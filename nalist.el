@@ -37,17 +37,40 @@
   "Set a KEY VALUE pair in NALIST with TESTFN."
   `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
-(cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
-  "Remove the pair with KEY in NALIST with TESTFN."
-  `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
-
-
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
   "Return the value of KEY in NALIST if exists TESTFN wise, otherwise DEFAULT."
   (alist-get key nalist default nil testfn))
 
+(cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
+  "Remove the pair with KEY in NALIST with TESTFN."
+  `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
+
+(defun nalist-map (function nalist)
+  "Call FUNCTION for all entries in NALIST.
+
+FUNCTION is called with two arguments, KEY and VALUE.
+‘nalist-map’ always returns nil.")
+
+(defun nalist-items (nalist)
+  "Return a list of all pairs in NALIST.")
+
+(defun nalist-keys (nalist)
+  "Return a list of all keys in NALIST.")
+
+(defun nalist-values (nalist)
+  "Retrun a list of all values in NALIST.")
+
+(defun nalist-copy (nalist-old nalist-new)
+  "Create NALIST-NEW by shallow-copying NALIST-OLD.")
+
+(defun nalist-pop (key nalist)
+  "Remove the pair with KEY from NALIST and return it.")
+
+(defun nalist-poppair (nalist)
+  "Remove a pair from NALIST and return it.")
+
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t is NALIST-A is a sbuset of NALIST-B, otherwise nil."
+  "Return t if NALIST-A is a sbuset of NALIST-B, otherwise nil."
   (let ((res t))
     (mapc #'(lambda (pair)
               (unless (member pair nalist-b)
@@ -60,6 +83,8 @@
   (and (nalist-subset-p nalist-a nalist-b)
        (nalist-subset-p nalist-b nalist-a)))
 
+(defun nalist-equal (nalist-a nalist-b)
+  "Return t if NALIST-A nad NALIST-B are identical `equal' wise, otherwise nil.")
 
 (provide 'nalist)
 ;;; nalist.el ends here
