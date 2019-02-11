@@ -29,36 +29,36 @@
 
 (require 'cl-lib)
 
-(defmacro nalist-clear (alist)
-  "Set ALIST nil."
-  `(setq ,alist nil))
+(defmacro nalist-clear (nalist)
+  "Set NALIST nil."
+  `(setq ,nalist nil))
 
-(cl-defmacro nalist-set (key value alist &key (testfn 'eq))
-  "Set a KEY VALUE pair in ALIST with TESTFN."
-  `(setf (alist-get ,key ,alist nil nil ',testfn) ,value))
+(cl-defmacro nalist-set (key value nalist &key (testfn 'eq))
+  "Set a KEY VALUE pair in NALIST with TESTFN."
+  `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
-(cl-defmacro nalist-remove (key alist &key (testfn 'eq))
-  "Remove the pair with KEY in ALIST with TESTFN."
-  `(setf (alist-get ,key ,alist nil t ',testfn) nil))
+(cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
+  "Remove the pair with KEY in NALIST with TESTFN."
+  `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
 
 
-(cl-defun nalist-get (key alist &key default (testfn 'eq))
-  "Return the value of KEY in ALIST if exists TESTFN wise, otherwise DEFAULT."
-  (alist-get key alist default nil testfn))
+(cl-defun nalist-get (key nalist &key default (testfn 'eq))
+  "Return the value of KEY in NALIST if exists TESTFN wise, otherwise DEFAULT."
+  (alist-get key nalist default nil testfn))
 
-(defun nalist-subset-p (alist-a alist-b)
-  "Return t is ALIST-A is a sbuset of ALIST-B, otherwise nil."
+(defun nalist-subset-p (nalist-a nalist-b)
+  "Return t is NALIST-A is a sbuset of NALIST-B, otherwise nil."
   (let ((res t))
     (mapc #'(lambda (pair)
-              (unless (member pair alist-b)
+              (unless (member pair nalist-b)
                 (setq res nil)))
-          alist-a)
+          nalist-a)
     res))
 
-(defun nalist-set-equal (alist-a alist-b)
-  "Return t if ALIST-A and ALIST-B are identical setwise, otherwise nil."
-  (and (nalist-subset-p alist-a alist-b)
-       (nalist-subset-p alist-b alist-a)))
+(defun nalist-set-equal (nalist-a nalist-b)
+  "Return t if NALIST-A and NALIST-B are identical setwise, otherwise nil."
+  (and (nalist-subset-p nalist-a nalist-b)
+       (nalist-subset-p nalist-b nalist-a)))
 
 
 (provide 'nalist)
