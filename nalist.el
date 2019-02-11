@@ -29,6 +29,10 @@
 
 (require 'cl-lib)
 
+(defmacro nalist-init (symbol alist)
+  "Bind the value of SYMBOL to a deep copy of ALIST."
+  `(setq ,symbol (copy-alist ,alist)))
+
 (defmacro nalist-clear (nalist)
   "Set NALIST nil."
   `(setq ,nalist nil))
@@ -45,29 +49,43 @@
   "Remove the pair with KEY in NALIST with TESTFN."
   `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
 
+(defun nalist-pairs (nalist)
+  "Return a list of all pairs in NALIST."
+  (copy-alist nalist))
+
+(defun nalist-keys (nalist)
+  "Return a list of all keys in NALIST."
+  (mapcar 'car nalist))
+
+(defun nalist-values (nalist)
+  "Retrun a list of all values in NALIST."
+  (mapcar 'cdr nalist))
+
+(defmacro nalist-copy (nalist-old nalist-new)
+  "Create NALIST-NEW by shallow-copying NALIST-OLD."
+  `(setq ,nalist-new (copy-alist ,nalist-old)))
+
+(defmacro nalist-pop (key nalist)
+  "Remove the pair with KEY from NALIST and return it."
+  (let ((before nil)
+        (found-pair nil)
+        (after nalist))
+    (while (and (not found-pair)
+                after)
+      (when (eq (car after) key)
+        (setq found-pair (car after))
+        (setq after (cdr after)))
+      (push (car after) before)
+      (setq after (cdr after)))))
+
+(defun nalist-poppair (nalist)
+    "Remove a pair from NALIST and return it.")
+
 (defun nalist-map (function nalist)
   "Call FUNCTION for all entries in NALIST.
 
 FUNCTION is called with two arguments, KEY and VALUE.
 ‘nalist-map’ always returns nil.")
-
-(defun nalist-items (nalist)
-  "Return a list of all pairs in NALIST.")
-
-(defun nalist-keys (nalist)
-  "Return a list of all keys in NALIST.")
-
-(defun nalist-values (nalist)
-  "Retrun a list of all values in NALIST.")
-
-(defun nalist-copy (nalist-old nalist-new)
-  "Create NALIST-NEW by shallow-copying NALIST-OLD.")
-
-(defun nalist-pop (key nalist)
-  "Remove the pair with KEY from NALIST and return it.")
-
-(defun nalist-poppair (nalist)
-  "Remove a pair from NALIST and return it.")
 
 (defun nalist-subset-p (nalist-a nalist-b)
   "Return t if NALIST-A is a sbuset of NALIST-B, otherwise nil."
