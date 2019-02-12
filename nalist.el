@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'seq)
 
 (defmacro nalist-init (symbol alist)
   "Bind the value of SYMBOL to a deep copy of ALIST."
@@ -65,27 +66,38 @@
   "Create NALIST-NEW by shallow-copying NALIST-OLD."
   `(setq ,nalist-new (copy-alist ,nalist-old)))
 
+;; FIXME: Need to be rewritten with cl-do or something.
 (defmacro nalist-pop (key nalist)
   "Remove the pair with KEY from NALIST and return it."
-  (let ((before nil)
-        (found-pair nil)
-        (after nalist))
-    (while (and (not found-pair)
-                after)
-      (when (eq (car after) key)
-        (setq found-pair (car after))
-        (setq after (cdr after)))
-      (push (car after) before)
-      (setq after (cdr after)))))
+  `(let ((before nil) ;; FIXME: Need to be gensymed.
+         (pair-found nil)
+         (after ,nalist))
+     (while after
+       (let ((pair (car after)))
+         (if (eq (car pair) ,key)
+             (setq pair-found pair)
+           (push pair before)))
+       (setq after (cdr after)))
+     (setq ,nalist before)
+     (cdr pair-found)))
 
-(defun nalist-poppair (nalist)
-    "Remove a pair from NALIST and return it.")
+(defmacro nalist-poppair (nalist)
+  "Remove a pair from NALIST and return it."
+  `(prog1
+       (car ,nalist)
+     (setq ,nalist (cdr ,nalist))))
 
 (defun nalist-map (function nalist)
   "Call FUNCTION for all entries in NALIST.
 
 FUNCTION is called with two arguments, KEY and VALUE.
-‘nalist-map’ always returns nil.")
+‘nalist-map’ always returns nil."
+  (let ((remaining nalist))
+    (while remaining
+      (let ((pair (car remaining)))
+        (funcall function (car pair) (cdr pair))
+        (setq remaining (cdr remaining))))
+    nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
   "Return t if NALIST-A is a sbuset of NALIST-B, otherwise nil."
@@ -102,7 +114,12 @@ FUNCTION is called with two arguments, KEY and VALUE.
        (nalist-subset-p nalist-b nalist-a)))
 
 (defun nalist-equal (nalist-a nalist-b)
-  "Return t if NALIST-A nad NALIST-B are identical `equal' wise, otherwise nil.")
+  "Return t if NALIST-A nad NALIST-B are identical `equal' wise, otherwise nil."
+  (equal nalist-a nalist-b))
+
+(defun nalist-seq-eaula (nalist-a nalist-b)
+  "Return t if NALIST-A and NALIST-B are identical sequence wise, otherwise nil."
+  (seq-set-equal-p nalist-a nalist-b))
 
 (provide 'nalist)
 ;;; nalist.el ends here

@@ -14,11 +14,38 @@
          (nalist-init nal '((a . b) (c . d)))
          (nalist-init nal-eql (copy-alist '((1 . a) (1.0 . b))))
          (nalist-init nal-equal (copy-alist '(("spam" . 3) ((a (b c)) . d))))
+         (nalist-init nal-4 '((a . b) (c . d) (e . f) (g . h)))
          ,@body)
      ;; teardown
-     (unintern 'nal)
-     (unintern 'nal-eql)
-     (unintern 'nal-equal)))
+     ))
+
+(ert-deftest test-nalist-map ()
+  (with-nalist-fixture
+   (let ((res nil))
+     (nalist-map #'(lambda (k v) (push k res)) nal-4)
+     (should (seq-set-equal-p res '(a c e g)))
+     )))
+
+(ert-deftest test-nalist-pop ()
+  (with-nalist-fixture
+   (should (eq (nalist-pop 'e nal-4)
+               'f))
+   (should (nalist-set-equal nal-4
+                             '((a . b) (c . d) (g . h))))))
+
+(ert-deftest test-nalist-poppair ()
+  (with-nalist-fixture
+   (should (equal (nalist-poppair nal-4)
+                  '(a . b)))
+   (should (nalist-set-equal nal-4
+                             '((c . d) (e . f) (g . h))))))
+
+(ert-deftest test-nalist-copy ()
+  (with-nalist-fixture
+   (nalist-copy nal nal-new)
+   (should (not (eq nal nal-new)))
+   (should (equal nal nal-new))
+   ))
 
 (ert-deftest test-nalist-values ()
   (with-nalist-fixture
