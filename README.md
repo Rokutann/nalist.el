@@ -1,6 +1,6 @@
 # nalist.el
 
-API to deal with association lists with names. It's safe with buffer-local lexical-binding.
+API to deal with association lists with names. It's safe with buffer-local and lexical-binding.
 
 ## Documentation
 
