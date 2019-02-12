@@ -30,9 +30,31 @@
 (require 'cl-lib)
 (require 'seq)
 
-(defmacro nalist-init (symbol alist)
-  "Bind the value of SYMBOL to a deep copy of ALIST."
-  `(setq ,symbol (copy-alist ,alist)))
+(defun nalist-pairp (obj)
+  "Return t if OBJ is a pair, otherwise nil."
+  (consp obj))
+
+(defun nalist-mappable-list-p (obj)
+  "Return t if OBJ is a list which can be used with `mapc' and such."
+  (or (null obj)
+      (and (listp obj)
+           (nalist-mappable-list-p (cdr obj)))))
+
+(defun nalist-nalist-p (obj)
+  "Return t if OBJ is alist, otherwise nil."
+  (and (nalist-mappable-list-p obj)
+       (let ((res t))
+         (mapc #'(lambda (pair)
+                   (unless (nalist-pairp pair)
+                     (setq res nil)))
+               obj)
+         res)))
+
+(cl-defmacro nalist-init (symbol alist &key shallow)
+  "Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST."
+  `(if ,shallow
+       (setq ,symbol ,alist)
+     (setq ,symbol (copy-alist ,alist))))
 
 (defmacro nalist-clear (nalist)
   "Set NALIST nil."
@@ -62,9 +84,11 @@
   "Retrun a list of all values in NALIST."
   (mapcar 'cdr nalist))
 
-(defmacro nalist-copy (nalist-old nalist-new)
-  "Create NALIST-NEW by shallow-copying NALIST-OLD."
-  `(setq ,nalist-new (copy-alist ,nalist-old)))
+(cl-defmacro nalist-copy (nalist-old nalist-new &key shallow)
+  "Create NALIST-NEW by deep-copying NALIST-OLD."
+  `(if ,shallow
+       (setq ,nalist-new ,nalist-old)
+     (setq ,nalist-new (copy-alist ,nalist-old))))
 
 ;; FIXME: Need to be rewritten with cl-do or something.
 (defmacro nalist-pop (key nalist)
@@ -100,7 +124,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a sbuset of NALIST-B, otherwise nil."
+  "Return t if NALIST-A is a sbuset of NALIST-B `equal' wise, otherwise nil."
   (let ((res t))
     (mapc #'(lambda (pair)
               (unless (member pair nalist-b)
@@ -108,18 +132,16 @@ FUNCTION is called with two arguments, KEY and VALUE.
           nalist-a)
     res))
 
-(defun nalist-set-equal (nalist-a nalist-b)
-  "Return t if NALIST-A and NALIST-B are identical setwise, otherwise nil."
-  (and (nalist-subset-p nalist-a nalist-b)
-       (nalist-subset-p nalist-b nalist-a)))
-
 (defun nalist-equal (nalist-a nalist-b)
   "Return t if NALIST-A nad NALIST-B are identical `equal' wise, otherwise nil."
   (equal nalist-a nalist-b))
 
-(defun nalist-seq-eaula (nalist-a nalist-b)
-  "Return t if NALIST-A and NALIST-B are identical sequence wise, otherwise nil."
-  (seq-set-equal-p nalist-a nalist-b))
+(defun nalist-set-equal (nalist-a nalist-b &optional testfn)
+  "Check with TESTFN if NALIST-A and NALIST-B have same pairs.
+
+Return t if so, otherwise nil.  The default TESTFN is `equal'."
+  (seq-set-equal-p nalist-a nalist-b testfn))
+
 
 (provide 'nalist)
 ;;; nalist.el ends here
