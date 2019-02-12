@@ -44,7 +44,7 @@ Return the value of KEY in NALIST if exists TESTFN-wise, otherwise DEFAULT.
 Set a pair with KEY and VALUE in NALIST by finding KEY with TESTFN.
 
 It destructively changes the value of KEY with VALUE if their is
-a pair with KEY already, otherwise creats a new pair with KEY and
+a pair with KEY already, otherwise creates a new pair with KEY and
 VALUE.
 
 (fn KEY VALUE NALIST &key (TESTFN 'eq))

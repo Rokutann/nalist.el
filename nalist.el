@@ -53,7 +53,7 @@ A proper list is a non circular cons chain whose last cdr points nil."
          for nth-cdr = obj then (cdr nth-cdr)
          for 2nth-cdr = (cdr obj) then (cddr 2nth-cdr)
          when (eq nth-cdr 2nth-cdr) return nil
-         ;; A circular list consists of finite posisions: When we move
+         ;; A circular list consists of finite positions: When we move
          ;; a pointer along its structure using `cdr', it goes back to
          ;; the same reference point in finite steps.  It's periodic.
          ;; Let's assume the period is N steps.  If we move two
@@ -66,7 +66,7 @@ A proper list is a non circular cons chain whose last cdr points nil."
          ;; because it's N-periodic.
          ;;
          when (null nth-cdr) return t
-         ;; nth-cdr and 2nth-cdr advance diffrent steps at a
+         ;; nth-cdr and 2nth-cdr advance different steps at a
          ;; time. That means there are some points where the nth-cdr
          ;; visit before the 2nth-cdr.  So, need to check nullness of
          ;; the nth-cdr.
@@ -74,19 +74,19 @@ A proper list is a non circular cons chain whose last cdr points nil."
          when (null 2nth-cdr) return t
          when (not (consp 2nth-cdr)) return nil
          ;; Check for non circular lists if 2nth cdr position is a
-         ;; terminous.
+         ;; terminus.
          ;;
          when (null (cdr 2nth-cdr)) return t
          when (not (consp (cdr 2nth-cdr))) return nil
          ;; Check for non circular lists if (2n+1)th cdr position is a
-         ;; terminous.
+         ;; terminus.
          ;;
          when (null (cddr 2nth-cdr)) return t
          when (not (consp (cddr 2nth-cdr))) return nil)
         ;; Check for non circular list if (2n+2)th, or the next 2nth,
-        ;; cdr position is a terminous.
+        ;; cdr position is a terminus.
         ;;
-        ;; Given the above three positions are not a terminous,
+        ;; Given the above three positions are not a terminus,
         ;; iterate over to the next nth and 2nth cdr positions.
         )))
 
@@ -141,7 +141,7 @@ their sharing of cons cells."
   "Set a pair with KEY and VALUE in NALIST by finding KEY with TESTFN.
 
 It destructively changes the value of KEY with VALUE if their is
-a pair with KEY already, otherwise creats a new pair with KEY and
+a pair with KEY already, otherwise creates a new pair with KEY and
 VALUE."
   `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
