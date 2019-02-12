@@ -40,13 +40,59 @@
 
 (defun nalist-mappable-list-p (obj)
   "Return t if OBJ is a list which can be used with `mapc' and the like."
-  (or (null obj)
-      (and (listp obj)
-           (nalist-mappable-list-p (cdr obj)))))
+  (nalist-proper-list-p obj))
+
+(defun nalist-proper-list-p (obj)
+  "Return t if OBJ is a proper list, otherwise nil.
+
+A proper list is a non circular cons chain whose last cdr points nil."
+  (or
+   (null obj)
+   (and (consp obj)
+        (cl-loop
+         for nth-cdr = obj then (cdr nth-cdr)
+         for 2nth-cdr = (cdr obj) then (cddr 2nth-cdr)
+         when (eq nth-cdr 2nth-cdr) return nil
+         ;; A circular list consists of finite posisions: When we move
+         ;; a pointer along its structure using `cdr', it goes back to
+         ;; the same reference point in finite steps.  It's periodic.
+         ;; Let's assume the period is N steps.  If we move two
+         ;; pointers so that one moves one step at a time starting
+         ;; from the position 1, the other moves two steps at a time
+         ;; starting from the position 2, the former points the nth
+         ;; position, the latter points the 2nth position after n
+         ;; iterations.  So, after N iterations, the former and the
+         ;; latter point the same position on the circular list
+         ;; because it's N-periodic circular.
+         ;;
+         when (null nth-cdr) return t
+         ;; nth-cdr and 2nth-cdr advance diffrent steps at a
+         ;; time. That means there are some points where the nth-cdr
+         ;; visit before the 2nth-cdr.  So, need to check nullness of
+         ;; the nth-cdr.
+         ;;
+         when (null 2nth-cdr) return t
+         when (not (consp 2nth-cdr)) return nil
+         ;; Check for non circular lists if 2nth cdr position is a
+         ;; terminous.
+         ;;
+         when (null (cdr 2nth-cdr)) return t
+         when (not (consp (cdr 2nth-cdr))) return nil
+         ;; Check for non circular lists if (2n+1)th cdr position is a
+         ;; terminous.
+         ;;
+         when (null (cddr 2nth-cdr)) return t
+         when (not (consp (cddr 2nth-cdr))) return nil)
+        ;; Check for non circular list if (2n+2)th, or the next 2nth,
+        ;; cdr position is a terminous.
+        ;;
+        ;; Given the above three positions are not a terminous,
+        ;; iterate over to the next nth and 2nth cdr positions.
+        )))
 
 (defun nalist-nalist-p (obj)
   "Return t if OBJ is alist, otherwise nil."
-  (and (nalist-mappable-list-p obj)
+  (and (nalist-proper-list-p obj)
        (let ((res t))
          (mapc #'(lambda (pair)
                    (unless (nalist-pairp pair)

@@ -19,6 +19,22 @@
      ;; teardown
      ))
 
+(ert-deftest test-nalist-proper-list-p ()
+  (should (eq (nalist-proper-list-p '#1=(#1# . #1#))
+              nil))
+  (should (eq (nalist-proper-list-p '#1=(#1#  #1#))
+              t))
+  (should (eq (nalist-proper-list-p '(#1=(a) . #1#))
+              t))
+  (should (eq (nalist-proper-list-p '#1=(a  #1#))
+              t))
+  (should (eq (nalist-proper-list-p '(#1=(a) b #1#))
+              t))
+  (should (eq (nalist-proper-list-p '#1=(#2=(a) (#2#) . #1#))
+              nil))
+  (should (eq (nalist-proper-list-p '#1=(#2=(#3=(a . #1#) . #2#) . #3#))
+              nil)))
+
 (ert-deftest test-nalist-pairp ()
   (should (eq (nalist-pairp nil)
               nil))
