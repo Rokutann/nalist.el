@@ -1,4 +1,4 @@
-;;; nalist-test.el --- Tests for nalist
+;;; nalist-test.el --- Tests for nalist.  -*- lexical-binding: t; -*-
 
 (require 'seq)
 (require 'ert)
@@ -189,6 +189,21 @@
    (should (nalist-set-equal nal '((a . b) (c . d) (e . f))))
    (nalist-set 'c 'g nal)
    (should (nalist-set-equal nal '((a . b) (c . g) (e . f))))))
+
+(ert-deftest test-lexical-binding ()
+  (setq closure nil)
+  (nalist-init nal '((v . w) (x . y)))
+  (let ((nal nil))
+    (nalist-init nal '((a . b) (c . d)))
+    (setq closure #'(lambda (key value)
+                      (nalist-set key value nal)
+                      nal)))
+  (should (nalist-set-equal nal
+                            '((v . w) (x . y))))
+  (should (nalist-set-equal (funcall closure 'a 'e)
+                            '((a . e) (c . d))))
+  (should (nalist-set-equal nal
+                            '((v . w) (x . y)))))
 
 (ert-deftest test-nalist-remove ()
   (with-nalist-fixture
