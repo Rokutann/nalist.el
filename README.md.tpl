@@ -2,7 +2,16 @@
 
 API to deal with association lists with names. It's safe with buffer-local and lexical-binding.
 
-## Documentation
+## Installation
+
+Place `nalist.el` on a directory in your `load-path', and add this to
+your Emacs config:
+
+```el
+(require 'nalist)
+```
+
+## Documentation and Examples
 
 ### nalist-init `(symbol alist &key shallow)`
 
