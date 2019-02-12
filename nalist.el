@@ -69,15 +69,19 @@
   `(setq ,nalist nil))
 
 (cl-defmacro nalist-set (key value nalist &key (testfn 'eq))
-  "Set a KEY VALUE pair in NALIST with TESTFN."
+  "Set a pair with KEY and VALUE in NALIST by finding KEY with TESTFN.
+
+It destructively changes the value of KEY with VALUE if their is
+a pair with KEY already, otherwise creats a new pair with KEY and
+VALUE."
   `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
-  "Return the value of KEY in NALIST if exists TESTFN wise, otherwise DEFAULT."
+  "Return the value of KEY in NALIST if exists TESTFN-wise, otherwise DEFAULT."
   (alist-get key nalist default nil testfn))
 
 (cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
-  "Remove the pair with KEY in NALIST with TESTFN."
+  "Remove the pair with KEY from NALIST if KEY exists TESTFN-wise."
   `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
 
 (defun nalist-pairs (nalist)
@@ -142,7 +146,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a subset of NALIST-B `equal' wise, otherwise nil."
+  "Return t if NALIST-A is a subset of NALIST-B `equal'-wise, otherwise nil."
   (let ((res t))
     (mapc #'(lambda (pair)
               (unless (member pair nalist-b)
@@ -151,7 +155,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     res))
 
 (defun nalist-equal (nalist-a nalist-b)
-  "Return t if NALIST-A nad NALIST-B are identical `equal' wise, otherwise nil."
+  "Return t if NALIST-A nad NALIST-B are identical `equal'-wise, otherwise nil."
   (equal nalist-a nalist-b))
 
 (defun nalist-set-equal (nalist-a nalist-b &optional testfn)

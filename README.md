@@ -19,7 +19,7 @@ Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST.
 
 ### nalist-get `(key nalist &key default (testfn 'eq))`
 
-Return the value of KEY in NALIST if exists TESTFN wise, otherwise DEFAULT.
+Return the value of KEY in NALIST if exists TESTFN-wise, otherwise DEFAULT.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
 
@@ -32,7 +32,11 @@ Return the value of KEY in NALIST if exists TESTFN wise, otherwise DEFAULT.
 
 ### nalist-set `(key value nalist &key (testfn 'eq))`
 
-Set a KEY VALUE pair in NALIST with TESTFN.
+Set a pair with KEY and VALUE in NALIST by finding KEY with TESTFN.
+
+It destructively changes the value of KEY with VALUE if their is
+a pair with KEY already, otherwise creats a new pair with KEY and
+VALUE.
 
 (fn KEY VALUE NALIST &key (TESTFN 'eq))
 
@@ -43,7 +47,7 @@ Set a KEY VALUE pair in NALIST with TESTFN.
 
 ### nalist-remove `(key nalist &key (testfn 'eq))`
 
-Remove the pair with KEY in NALIST with TESTFN.
+Remove the pair with KEY from NALIST if KEY exists TESTFN-wise.
 
 (fn KEY NALIST &key (TESTFN 'eq))
 
@@ -162,7 +166,7 @@ Return t if OBJ is alist, otherwise nil.
 
 ### nalist-subset-p `(nalist-a nalist-b)`
 
-Return t if NALIST-A is a subset of NALIST-B ‘equal’ wise, otherwise nil.
+Return t if NALIST-A is a subset of NALIST-B ‘equal’-wise, otherwise nil.
 
 ```lisp
 (nalist-subset-p '((a . b)) '((a . b) (c . d))) ;; => t
@@ -171,7 +175,7 @@ Return t if NALIST-A is a subset of NALIST-B ‘equal’ wise, otherwise nil.
 
 ### nalist-equal `(nalist-a nalist-b)`
 
-Return t if NALIST-A nad NALIST-B are identical ‘equal’ wise, otherwise nil.
+Return t if NALIST-A nad NALIST-B are identical ‘equal’-wise, otherwise nil.
 
 ```lisp
 (nalist-equal nal-1 '((a . b) (c . d)))) ;; => t
