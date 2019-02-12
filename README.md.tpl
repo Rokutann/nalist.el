@@ -130,6 +130,7 @@ API to deal with association lists with names. It's safe with buffer-local lexic
 (nalist-mappable-list-p nil) ;; => t
 (nalist-mappable-list-p '(a)) ;; => t
 (nalist-mappable-list-p '(a . b)) ;; => nil
+
 ```
 
 ### nalist-nalist-p `(obj)`
@@ -137,6 +138,10 @@ API to deal with association lists with names. It's safe with buffer-local lexic
 {{nalist-nalist-p}}
 
 ```lisp
+(nalist-nalist-p nil) ;; => t
+(nalist-nalist-p '(a . b)) ;; => nil
+(nalist-nalist-p '((a . b) . c)) ;; => nil
+(nalist-nalist-p '((a . b) (c . d))) ;; => t-p '((a . b)  (c . d))) ;; => t
 ```
 
 ### nalist-subset-p `(nalist-a nalist-b)`
@@ -144,10 +149,8 @@ API to deal with association lists with names. It's safe with buffer-local lexic
 {{nalist-subset-p}}
 
 ```lisp
-(nalist-mappable-list-p nil) ;; => t
-(nalist-mappable-list-p '(a . b)) ;; => nil
-(nalist-mappable-list-p '((a . b) . c)) ;; => nil
-(nalist-mappable-list-p '((a . b)  (c . d))) ;; => t
+(nalist-subset-p '((a . b)) '((a . b) (c . d))) ;; => t
+(nalist-subset-p '((a . b) (c . d)) '((a . b))) ;; => nil
 ```
 
 ### nalist-equal `(nalist-a nalist-b)`

@@ -146,6 +146,7 @@ Return t if OBJ is a list which can be used with ‘mapc’ and such.
 (nalist-mappable-list-p nil) ;; => t
 (nalist-mappable-list-p '(a)) ;; => t
 (nalist-mappable-list-p '(a . b)) ;; => nil
+
 ```
 
 ### nalist-nalist-p `(obj)`
@@ -153,6 +154,10 @@ Return t if OBJ is a list which can be used with ‘mapc’ and such.
 Return t if OBJ is alist, otherwise nil.
 
 ```lisp
+(nalist-nalist-p nil) ;; => t
+(nalist-nalist-p '(a . b)) ;; => nil
+(nalist-nalist-p '((a . b) . c)) ;; => nil
+(nalist-nalist-p '((a . b) (c . d))) ;; => t-p '((a . b)  (c . d))) ;; => t
 ```
 
 ### nalist-subset-p `(nalist-a nalist-b)`
@@ -160,10 +165,8 @@ Return t if OBJ is alist, otherwise nil.
 Return t if NALIST-A is a subset of NALIST-B ‘equal’ wise, otherwise nil.
 
 ```lisp
-(nalist-mappable-list-p nil) ;; => t
-(nalist-mappable-list-p '(a . b)) ;; => nil
-(nalist-mappable-list-p '((a . b) . c)) ;; => nil
-(nalist-mappable-list-p '((a . b)  (c . d))) ;; => t
+(nalist-subset-p '((a . b)) '((a . b) (c . d))) ;; => t
+(nalist-subset-p '((a . b) (c . d)) '((a . b))) ;; => nil
 ```
 
 ### nalist-equal `(nalist-a nalist-b)`
