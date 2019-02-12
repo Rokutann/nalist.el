@@ -63,7 +63,7 @@ A proper list is a non circular cons chain whose last cdr points nil."
          ;; position, the latter points the 2nth position after n
          ;; iterations.  So, after N iterations, the former and the
          ;; latter point the same position on the circular list
-         ;; because it's N-periodic circular.
+         ;; because it's N-periodic.
          ;;
          when (null nth-cdr) return t
          ;; nth-cdr and 2nth-cdr advance diffrent steps at a

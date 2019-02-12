@@ -151,14 +151,18 @@ Return t if OBJ is a pair, otherwise nil.
 (nalist-pairp '(a . b)) ;; => t
 ```
 
-### nalist-mappable-list-p `(obj)`
+### nalist-proper-list-p `(obj)`
 
-Return t if OBJ is a list which can be used with ‘mapc’ and the like.
+Return t if OBJ is a proper list, otherwise nil.
+
+A proper list is a non circular cons chain whose last cdr points nil.
 
 ```lisp
-(nalist-mappable-list-p nil) ;; => t
-(nalist-mappable-list-p '(a)) ;; => t
-(nalist-mappable-list-p '(a . b)) ;; => nil
+(nalist-proper-list-p nil) ;; => t
+(nalist-proper-list-p '#1=(#1# . #1#)) ;; => nil
+(nalist-proper-list-p '#1=(#1#  #1#)) ;; => t
+(nalist-proper-list-p '(a)) ;; => t
+(nalist-proper-list-p '(a . b)) ;; => nil
 
 ```
 

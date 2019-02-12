@@ -131,14 +131,16 @@ your Emacs config:
 (nalist-pairp '(a . b)) ;; => t
 ```
 
-### nalist-mappable-list-p `(obj)`
+### nalist-proper-list-p `(obj)`
 
-{{nalist-mappable-list-p}}
+{{nalist-proper-list-p}}
 
 ```lisp
-(nalist-mappable-list-p nil) ;; => t
-(nalist-mappable-list-p '(a)) ;; => t
-(nalist-mappable-list-p '(a . b)) ;; => nil
+(nalist-proper-list-p nil) ;; => t
+(nalist-proper-list-p '#1=(#1# . #1#)) ;; => nil
+(nalist-proper-list-p '#1=(#1#  #1#)) ;; => t
+(nalist-proper-list-p '(a)) ;; => t
+(nalist-proper-list-p '(a . b)) ;; => nil
 
 ```
 
