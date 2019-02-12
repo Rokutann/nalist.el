@@ -1,6 +1,6 @@
 # nalist.el
 
-API to deal with named alists, or association lists with names. It's safe with buffer-local and lexical-binding.
+API to deal with association lists with names, or named alists. It's safe with buffer-local and lexical-binding.
 
 ## Installation
 
@@ -153,7 +153,7 @@ Return t if OBJ is a pair, otherwise nil.
 
 ### nalist-mappable-list-p `(obj)`
 
-Return t if OBJ is a list which can be used with ‘mapc’ and such.
+Return t if OBJ is a list which can be used with ‘mapc’ and the like.
 
 ```lisp
 (nalist-mappable-list-p nil) ;; => t
@@ -170,7 +170,7 @@ Return t if OBJ is alist, otherwise nil.
 (nalist-nalist-p nil) ;; => t
 (nalist-nalist-p '(a . b)) ;; => nil
 (nalist-nalist-p '((a . b) . c)) ;; => nil
-(nalist-nalist-p '((a . b) (c . d))) ;; => t-p '((a . b)  (c . d))) ;; => t
+(nalist-nalist-p '((a . b) (c . d))) ;; => t
 ```
 
 ### nalist-subset-p `(nalist-a nalist-b)`
@@ -193,9 +193,9 @@ Return t if NALIST-A nad NALIST-B are identical ‘equal’-wise, otherwise nil.
 
 ### nalist-set-equal `(nalist-a nalist-b &optional testfn)`
 
-Check with TESTFN if NALIST-A and NALIST-B have same pairs.
+Check with TESTFN if NALIST-A and NALIST-B have the same pairs.
 
-Return t if so, otherwise nil.  The default TESTFN is ‘equal’.
+If so, return t, otherwise nil.  The default TESTFN is ‘equal’.
 
 ```lisp
 (nalist-set-equal nal-1 '((a . b) (c . d)))) ;; => t

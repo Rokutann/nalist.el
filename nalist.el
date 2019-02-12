@@ -39,7 +39,7 @@
   (consp obj))
 
 (defun nalist-mappable-list-p (obj)
-  "Return t if OBJ is a list which can be used with `mapc' and such."
+  "Return t if OBJ is a list which can be used with `mapc' and the like."
   (or (null obj)
       (and (listp obj)
            (nalist-mappable-list-p (cdr obj)))))
@@ -63,6 +63,29 @@
          (setq ,symbol ,alist)
        (setq ,symbol (copy-alist ,alist)))
      ',symbol))
+
+(defmacro nalist-make-local-variable (nalist)
+  "Create a buffer local binding in the current buffer for NALIST.
+
+This macro deep-copies the content of the original NALIST to the
+buffer-local NALIST, to avoid their sharing of cons cells."
+  (let ((copy (gensym)))
+    `(let ((,copy (copy-alist ,nalist)))
+       (make-local-variable ',nalist)
+       (setq ,nalist ,copy)))
+  ',nalist)
+
+(defmacro nalist-make-variable-buffer-local (nalist)
+  "Mark NALIST automarically buffer local.
+
+This macro sets the default value of NALIST nil to avoid
+their sharing of cons cells."
+  (let ((copy (gensym)))
+    `(let ((,copy ,nalist))
+       (setq ,nalist nil)
+       (make-variable-buffer-local ',nalist)
+       (setq ,nalist ,copy)))
+  ',nalist)
 
 (defmacro nalist-clear (nalist)
   "Set NALIST nil."
@@ -159,9 +182,9 @@ FUNCTION is called with two arguments, KEY and VALUE.
   (equal nalist-a nalist-b))
 
 (defun nalist-set-equal (nalist-a nalist-b &optional testfn)
-  "Check with TESTFN if NALIST-A and NALIST-B have same pairs.
+  "Check with TESTFN if NALIST-A and NALIST-B have the same pairs.
 
-Return t if so, otherwise nil.  The default TESTFN is `equal'."
+If so, return t, otherwise nil.  The default TESTFN is `equal'."
   (seq-set-equal-p nalist-a nalist-b testfn))
 
 

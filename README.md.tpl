@@ -1,6 +1,6 @@
 # nalist.el
 
-API to deal with named alists, or association lists with names. It's safe with buffer-local and lexical-binding.
+API to deal with association lists with names, or named alists. It's safe with buffer-local and lexical-binding.
 
 ## Installation
 
@@ -150,7 +150,7 @@ your Emacs config:
 (nalist-nalist-p nil) ;; => t
 (nalist-nalist-p '(a . b)) ;; => nil
 (nalist-nalist-p '((a . b) . c)) ;; => nil
-(nalist-nalist-p '((a . b) (c . d))) ;; => t-p '((a . b)  (c . d))) ;; => t
+(nalist-nalist-p '((a . b) (c . d))) ;; => t
 ```
 
 ### nalist-subset-p `(nalist-a nalist-b)`
