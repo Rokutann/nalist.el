@@ -22,6 +22,8 @@
 (ert-deftest test-nalist-pairp ()
   (should (eq (nalist-pairp nil)
               nil))
+  (should (eq (nalist-pairp 'a)
+              nil))
   (should (eq (nalist-pairp '(a))
               t))
   (should (eq (nalist-pairp '(nil . a))
@@ -78,7 +80,9 @@
   (should (not (eq alist na-deep)))
   (should (equal alist na-deep))
   (should (eq na-nil nil))
-  (should-error (nalist-init na 'a)))
+  (should (eq (nalist-init na-1 '((a . b) (c . d)))
+              'na-1))
+  (should-error (nalist-init na-2 'a)))
 
 (ert-deftest test-nalist-equal ()
   (should (nalist-equal nal

@@ -1,4 +1,4 @@
-;;; nalist.el --- A named association list library.  -*- lexical-binding: t; -*-
+;;; nalist.el --- API for named association lists.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019  Cyriakus "Mukuge" Hill
 
@@ -8,6 +8,10 @@
 ;; Package-Version: 0.0.1
 ;; Package-Requires: ((emacs "26.1"))
 
+;; This file is NOT part of GNU Emacs.
+
+;;; License:
+
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -15,15 +19,15 @@
 
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; A named association list library.
+;; API for named association lists.
 
 ;;; Code:
 
@@ -57,7 +61,8 @@
        (error "Invalid initial value `%s'" ,alist))
      (if ,shallow
          (setq ,symbol ,alist)
-       (setq ,symbol (copy-alist ,alist)))))
+       (setq ,symbol (copy-alist ,alist)))
+     ',symbol))
 
 (defmacro nalist-clear (nalist)
   "Set NALIST nil."
@@ -97,7 +102,8 @@ otherwise deep-copy it."
        (error "Invalid initial value: `%s'" ,nalist-old))
      (if ,shallow
          (setq ,nalist-new ,nalist-old)
-       (setq ,nalist-new (copy-alist ,nalist-old)))))
+       (setq ,nalist-new (copy-alist ,nalist-old)))
+     ',nalist-new))
 
 (defmacro nalist-pop (key nalist)
   "Remove the pair with KEY from NALIST and return it."
