@@ -77,7 +77,8 @@
   (should (eq alist na-shallow))
   (should (not (eq alist na-deep)))
   (should (equal alist na-deep))
-  (should (eq na-nil nil)))
+  (should (eq na-nil nil))
+  (should-error (nalist-init na 'a)))
 
 (ert-deftest test-nalist-equal ()
   (should (nalist-equal nal
@@ -113,7 +114,8 @@
    (should (eq nal nal-shallow))
    (should (not (eq nal nal-deep)))
    (should (equal nal nal-deep))
-   ))
+   (setq not-nalist 'a)
+   (should-error (nalist-copy not-nalist nal-new))))
 
 (ert-deftest test-nalist-values ()
   (with-nalist-fixture

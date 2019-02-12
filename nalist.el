@@ -4,7 +4,7 @@
 
 ;; Author: Cyriakus "Mukuge" Hill <cyriakus.h@gmail.com>
 ;; Keywords: Lisp, tools
-;; URL: https://github.com/mukuge/nalist
+;; URL: https://github.com/mukuge/nalist.el
 ;; Package-Version: 0.0.1
 ;; Package-Requires: ((emacs "26.1"))
 
@@ -52,9 +52,12 @@
 
 (cl-defmacro nalist-init (symbol alist &key shallow)
   "Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST."
-  `(if ,shallow
-       (setq ,symbol ,alist)
-     (setq ,symbol (copy-alist ,alist))))
+  `(progn
+     (unless (nalist-nalist-p ,alist)
+       (error "Invalid initial value `%s'" ,alist))
+     (if ,shallow
+         (setq ,symbol ,alist)
+       (setq ,symbol (copy-alist ,alist)))))
 
 (defmacro nalist-clear (nalist)
   "Set NALIST nil."
@@ -85,25 +88,34 @@
   (mapcar 'cdr nalist))
 
 (cl-defmacro nalist-copy (nalist-old nalist-new &key shallow)
-  "Create NALIST-NEW by deep-copying NALIST-OLD."
-  `(if ,shallow
-       (setq ,nalist-new ,nalist-old)
-     (setq ,nalist-new (copy-alist ,nalist-old))))
+  "Create NALIST-NEW by SHALLOW or deep copying NALIST-OLD.
 
-;; FIXME: Need to be rewritten with cl-do or something.
+Shallow-copy the content of NALIST-NEW if SHALLOW is non-nil,
+otherwise deep-copy it."
+  `(progn
+     (unless (nalist-nalist-p ,nalist-old)
+       (error "Invalid initial value: `%s'" ,nalist-old))
+     (if ,shallow
+         (setq ,nalist-new ,nalist-old)
+       (setq ,nalist-new (copy-alist ,nalist-old)))))
+
 (defmacro nalist-pop (key nalist)
   "Remove the pair with KEY from NALIST and return it."
-  `(let ((before nil) ;; FIXME: Need to be gensymed.
-         (pair-found nil)
-         (after ,nalist))
-     (while after
-       (let ((pair (car after)))
-         (if (eq (car pair) ,key)
-             (setq pair-found pair)
-           (push pair before)))
-       (setq after (cdr after)))
-     (setq ,nalist before)
-     (cdr pair-found)))
+  (let ((before (gensym))
+        (after (gensym))
+        (pair (gensym))
+        (pair-found (gensym)))
+    `(cl-do* ((,before nil)
+              (,after ,nalist (cdr ,after))
+              (,pair (car ,after) (car ,after))
+              (,pair-found nil)
+              )
+         ((null ,after)
+          (setq ,nalist ,before)
+          (cdr ,pair-found))
+       (if (eq (car ,pair) ,key)
+           (setq ,pair-found ,pair)
+         (push ,pair ,before)))))
 
 (defmacro nalist-poppair (nalist)
   "Remove a pair from NALIST and return it."
@@ -124,7 +136,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a sbuset of NALIST-B `equal' wise, otherwise nil."
+  "Return t if NALIST-A is a subset of NALIST-B `equal' wise, otherwise nil."
   (let ((res t))
     (mapc #'(lambda (pair)
               (unless (member pair nalist-b)
