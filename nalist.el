@@ -35,13 +35,16 @@
 (require 'seq)
 
 (defun nalist-pairp (obj)
-  "Return t if OBJ is a pair, otherwise nil."
+  "Return t if OBJ is a pair, otherwise nil.
+
+A pair is a cons cell, regardless of what Lisp objects its `car'
+and `cdr' point."
   (consp obj))
 
 (defun nalist-proper-list-p (obj)
   "Return t if OBJ is a proper list, otherwise nil.
 
-A proper list is a non circular cons chain whose last cdr points nil."
+A proper list is a non circular cons chain whose last `cdr' points nil."
   (or
    (null obj)
    (and (consp obj)
@@ -87,7 +90,9 @@ A proper list is a non circular cons chain whose last cdr points nil."
         )))
 
 (defun nalist-nalist-p (obj)
-  "Return t if OBJ is an alist, otherwise nil."
+  "Return t if OBJ is an alist, otherwise nil.
+
+An alist, or association list, is a proper list of pairs."
   (and (nalist-proper-list-p obj)
        (let ((res t))
          (mapc #'(lambda (pair)
@@ -97,7 +102,7 @@ A proper list is a non circular cons chain whose last cdr points nil."
          res)))
 
 (cl-defmacro nalist-init (symbol alist &key shallow)
-  "Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST."
+  "Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST."
   `(progn
      (unless (nalist-nalist-p ,alist)
        (error "Invalid initial value `%s'" ,alist))
@@ -107,7 +112,7 @@ A proper list is a non circular cons chain whose last cdr points nil."
      ',symbol))
 
 (defmacro nalist-make-local-variable (nalist)
-  "Create a buffer local binding in the current buffer for NALIST.
+  "Create a buffer-local binding in the current buffer for NALIST.
 
 This macro binds a deep-copy of the content of the original
 NALIST to the buffer-local NALIST to avoid their sharing cons
@@ -141,17 +146,17 @@ in other buffers share the cons cells through it."
 (cl-defmacro nalist-set (key value nalist &key (testfn 'eq))
   "Find a pair with KEY in NALIST with TESTFN, and set its value VALUE.
 
-It destructively changes the value of KEY with VALUE if their is
-already a pair with KEY, otherwise creates a new pair with KEY and
-VALUE."
+It destructively changes the value of KEY into VALUE if their a
+pair with KEY already exists in NALIST, otherwise creates a new
+pair with KEY and VALUE."
   `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
-  "Return the value of KEY in NALIST if it exists TESTFN-wise, otherwise DEFAULT."
+  "Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT."
   (alist-get key nalist default nil testfn))
 
 (cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
-  "Remove the pair with KEY from NALIST if KEY exists TESTFN-wise."
+  "Remove the pair with KEY from NALIST if found TESTFN-wise."
   `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
 
 (defun nalist-pairs (nalist)
@@ -169,7 +174,7 @@ VALUE."
 (cl-defmacro nalist-copy (nalist-old nalist-new &key shallow)
   "Copy and bind the content of NALIST-OLD to NALIST-NEW.
 
-This macro uses shallow-copy if SHALLOW is non-nil, otherwise it
+This macro uses shallow-copy if SHALLOW is non-nil, otherwise
 uses deep-copy."
   `(progn
      (unless (nalist-nalist-p ,nalist-old)
@@ -198,13 +203,13 @@ uses deep-copy."
          (push ,pair ,before)))))
 
 (defmacro nalist-poppair (nalist)
-  "Remove a pair from NALIST, and return it."
+  "Return a pair in NALIST, and remove it from NALIST."
   `(prog1
        (car ,nalist)
      (setq ,nalist (cdr ,nalist))))
 
 (defun nalist-map (function nalist)
-  "Call FUNCTION for all entries in NALIST.
+  "Call FUNCTION for all pairs in NALIST.
 
 FUNCTION is called with two arguments, KEY and VALUE.
 ‘nalist-map’ always returns nil."

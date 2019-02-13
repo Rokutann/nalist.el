@@ -15,7 +15,7 @@ your Emacs config:
 
 ### nalist-init `(symbol alist &key shallow)`
 
-Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST.
+Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
 (fn SYMBOL ALIST &key SHALLOW)
 
@@ -28,7 +28,7 @@ Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST.
 
 ### nalist-get `(key nalist &key default (testfn 'eq))`
 
-Return the value of KEY in NALIST if it exists TESTFN-wise, otherwise DEFAULT.
+Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
 
@@ -43,9 +43,9 @@ Return the value of KEY in NALIST if it exists TESTFN-wise, otherwise DEFAULT.
 
 Find a pair with KEY in NALIST with TESTFN, and set its value VALUE.
 
-It destructively changes the value of KEY with VALUE if their is
-already a pair with KEY, otherwise creates a new pair with KEY and
-VALUE.
+It destructively changes the value of KEY into VALUE if their a
+pair with KEY already exists in NALIST, otherwise creates a new
+pair with KEY and VALUE.
 
 (fn KEY VALUE NALIST &key (TESTFN 'eq))
 
@@ -56,7 +56,7 @@ VALUE.
 
 ### nalist-remove `(key nalist &key (testfn 'eq))`
 
-Remove the pair with KEY from NALIST if KEY exists TESTFN-wise.
+Remove the pair with KEY from NALIST if found TESTFN-wise.
 
 (fn KEY NALIST &key (TESTFN 'eq))
 
@@ -76,7 +76,7 @@ Remove the pair with KEY from NALIST, and return the value of the pair.
 
 ### nalist-poppair `(nalist)`
 
-Remove a pair from NALIST, and return it.
+Return a pair in NALIST, and remove it from NALIST.
 
 ```lisp
 (nalist-poppair nal-1) ;; => '(a . b)
@@ -111,7 +111,7 @@ Return a list consisting all the values in NALIST.
 
 Copy and bind the content of NALIST-OLD to NALIST-NEW.
 
-This macro uses shallow-copy if SHALLOW is non-nil, otherwise it
+This macro uses shallow-copy if SHALLOW is non-nil, otherwise
 uses deep-copy.
 
 (fn NALIST-OLD NALIST-NEW &key SHALLOW)
@@ -131,7 +131,7 @@ Set NALIST nil.
 
 ### nalist-map `(function nalist)`
 
-Call FUNCTION for all entries in NALIST.
+Call FUNCTION for all pairs in NALIST.
 
 FUNCTION is called with two arguments, KEY and VALUE.
 ‘nalist-map’ always returns nil.
@@ -146,6 +146,9 @@ FUNCTION is called with two arguments, KEY and VALUE.
 
 Return t if OBJ is a pair, otherwise nil.
 
+A pair is a cons cell, regardless of what Lisp objects its ‘car’
+and ‘cdr’ point.
+
 ```lisp
 (nalist-pairp 'a) ;; => nil
 (nalist-pairp '(a . b)) ;; => t
@@ -155,7 +158,7 @@ Return t if OBJ is a pair, otherwise nil.
 
 Return t if OBJ is a proper list, otherwise nil.
 
-A proper list is a non circular cons chain whose last cdr points nil.
+A proper list is a non circular cons chain whose last ‘cdr’ points nil.
 
 ```lisp
 (nalist-proper-list-p nil) ;; => t
@@ -169,6 +172,8 @@ A proper list is a non circular cons chain whose last cdr points nil.
 ### nalist-nalist-p `(obj)`
 
 Return t if OBJ is an alist, otherwise nil.
+
+An alist, or association list, is a proper list of pairs.
 
 ```lisp
 (nalist-nalist-p nil) ;; => t
