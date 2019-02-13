@@ -1,4 +1,4 @@
-;;; test-helper.el --- Nalist: Helpers for the tests. -*- lexical-binding: t; -*-
+;;; nalist-init.el --- Nalist: Initialization for the tests.  -*- lexical-binding: t; -*-
 ;; Copyright (C) 2019  Cyriakus "Mukuge" Hill
 
 ;; Author: Cyriakus "Mukuge" Hill <cyriakus.h@gmail.com>
@@ -26,16 +26,12 @@
 
 ;;; Code:
 
-(defmacro with-nalist-fixture (&rest body)
-  `(unwind-protect
-       (progn
-         ;; setup
-         (nalist-init nal '((a . b) (c . d)))
-         (nalist-init nal-eql '((1 . a) (1.0 . b)))
-         (nalist-init nal-equal '(("foo" . 3) ((a (b c)) . d)))
-         (nalist-init nal-4 '((a . b) (c . d) (e . f) (g . h)))
-         ,@body)
-     ;; teardown
-     ))
+(require 'seq)
+(require 'ert)
+(require 'f)
+(require 's)
 
-;;; test-helper.el ends here
+(load (f-expand "nalist.el" default-directory))
+
+(provide 'nalist-init)
+;;; nalist-init.el ends here

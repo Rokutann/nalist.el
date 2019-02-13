@@ -41,11 +41,11 @@ Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT.
 
 ### nalist-set `(key value nalist &key (testfn 'eq))`
 
-Find a pair with KEY in NALIST with TESTFN, and set its value VALUE.
+Find a pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-It destructively changes the value of KEY into VALUE if their a
-pair with KEY already exists in NALIST, otherwise creates a new
-pair with KEY and VALUE.
+It destructively changes the value of KEY into VALUE if a pair
+with KEY already exists in NALIST, otherwise creates a new pair
+with KEY and VALUE.
 
 (fn KEY VALUE NALIST &key (TESTFN 'eq))
 
@@ -173,7 +173,9 @@ A proper list is a non circular cons chain whose last ‘cdr’ points nil.
 
 Return t if OBJ is an alist, otherwise nil.
 
-An alist, or association list, is a proper list of pairs.
+An alist, or association list, is a proper list of pairs.  What
+‘car’ and ‘cdr’ of a pair in alist point is often called a key
+and value respectively.
 
 ```lisp
 (nalist-nalist-p nil) ;; => t

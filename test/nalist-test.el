@@ -1,28 +1,39 @@
-;;; nalist-test.el --- Tests for nalist.  -*- lexical-binding: t; -*-
+;;; nalist-test.el --- Nalist: Tests.  -*- lexical-binding: t; -*-
+;; Copyright (C) 2019  Cyriakus "Mukuge" Hill
 
-(require 'seq)
-(require 'ert)
-(require 'f)
-(require 's)
+;; Author: Cyriakus "Mukuge" Hill <cyriakus.h@gmail.com>
+;; Keywords: Lisp, tools
+;; URL: https://github.com/mukuge/nalist.el
 
-(load (f-expand "nalist.el" default-directory))
+;; This file is NOT part of GNU Emacs.
 
-(defmacro with-nalist-fixture (&rest body)
-  `(unwind-protect
-       (progn
-         ;; setup
-         (nalist-init nal '((a . b) (c . d)))
-         (nalist-init nal-eql '((1 . a) (1.0 . b)))
-         (nalist-init nal-equal '(("foo" . 3) ((a (b c)) . d)))
-         (nalist-init nal-4 '((a . b) (c . d) (e . f) (g . h)))
-         ,@body)
-     ;; teardown
-     ))
+;;; License:
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;;; Code:
 
 (ert-deftest test-nalist-proper-list-p-circular ()
   (should (eq (nalist-proper-list-p '#1=(#1# . #1#))
               nil))
   (should (eq (nalist-proper-list-p '#1=(#1#  #1#))
+              t))
+  (should (eq (nalist-proper-list-p '#1=(#2=(#1# . #2#) . #1#))
+              nil))
+  (should (eq (nalist-proper-list-p '#1=(#2=(#1# . #4=#1#) . #3=(#4# . #2#)))
               t))
   (should (eq (nalist-proper-list-p '(#1=(a) . #1#))
               t))
@@ -225,9 +236,5 @@
   (with-nalist-fixture
    (nalist-remove 'a nal)
    (should (nalist-set-equal nal '((c . d))))))
-
-;; Local Variables:
-;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)
-;; End:
 
 ;;; nalist-test.el ends here

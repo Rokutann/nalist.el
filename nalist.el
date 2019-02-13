@@ -92,7 +92,9 @@ A proper list is a non circular cons chain whose last `cdr' points nil."
 (defun nalist-nalist-p (obj)
   "Return t if OBJ is an alist, otherwise nil.
 
-An alist, or association list, is a proper list of pairs."
+An alist, or association list, is a proper list of pairs.  What
+`car' and `cdr' of a pair in alist point is often called a key
+and value respectively."
   (and (nalist-proper-list-p obj)
        (let ((res t))
          (mapc #'(lambda (pair)
@@ -144,11 +146,11 @@ in other buffers share the cons cells through it."
   `(setq ,nalist nil))
 
 (cl-defmacro nalist-set (key value nalist &key (testfn 'eq))
-  "Find a pair with KEY in NALIST with TESTFN, and set its value VALUE.
+  "Find a pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-It destructively changes the value of KEY into VALUE if their a
-pair with KEY already exists in NALIST, otherwise creates a new
-pair with KEY and VALUE."
+It destructively changes the value of KEY into VALUE if a pair
+with KEY already exists in NALIST, otherwise creates a new pair
+with KEY and VALUE."
   `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
