@@ -96,7 +96,7 @@ Return a list of all pairs in NALIST.
 Return a list of all keys in NALIST.
 
 ```lisp
-(nalist-keys nal) ;; => '(a c)
+(nalist-keys nal-1) ;; => '(a c)
 ```
 
 ### nalist-values `(nalist)`
@@ -104,7 +104,7 @@ Return a list of all keys in NALIST.
 Retrun a list of all values in NALIST.
 
 ```lisp
-(nalist-values nal) ;; => '(b d)
+(nalist-values nal-1) ;; => '(b d)
 ```
 
 ### nalist-copy `(nalist-old nalist-new &key shallow)`
@@ -126,7 +126,7 @@ otherwise deep-copy it.
 Set NALIST nil.
 
 ```lisp
-(nalist-clear nal) ;; => nil
+(nalist-clear nal-1) ;; => nil
 ```
 
 ### nalist-map `(function nalist)`

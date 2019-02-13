@@ -38,10 +38,6 @@
   "Return t if OBJ is a pair, otherwise nil."
   (consp obj))
 
-(defun nalist-mappable-list-p (obj)
-  "Return t if OBJ is a list which can be used with `mapc' and the like."
-  (nalist-proper-list-p obj))
-
 (defun nalist-proper-list-p (obj)
   "Return t if OBJ is a proper list, otherwise nil.
 
@@ -91,7 +87,7 @@ A proper list is a non circular cons chain whose last cdr points nil."
         )))
 
 (defun nalist-nalist-p (obj)
-  "Return t if OBJ is alist, otherwise nil."
+  "Return t if OBJ is an alist, otherwise nil."
   (and (nalist-proper-list-p obj)
        (let ((res t))
          (mapc #'(lambda (pair)
@@ -113,8 +109,9 @@ A proper list is a non circular cons chain whose last cdr points nil."
 (defmacro nalist-make-local-variable (nalist)
   "Create a buffer local binding in the current buffer for NALIST.
 
-This macro deep-copies the content of the original NALIST to the
-buffer-local NALIST, to avoid their sharing of cons cells."
+This macro binds a deep-copy of the content of the original
+NALIST to the buffer-local NALIST to avoid their sharing cons
+cells."
   (let ((copy (gensym)))
     `(let ((,copy (copy-alist ,nalist)))
        (make-local-variable ',nalist)
@@ -122,10 +119,14 @@ buffer-local NALIST, to avoid their sharing of cons cells."
   ',nalist)
 
 (defmacro nalist-make-variable-buffer-local (nalist)
-  "Mark NALIST automarically buffer local.
+  "Mark NALIST automatically buffer local.
 
-This macro sets the default value of NALIST nil to avoid
-their sharing of cons cells."
+This macro binds a deep-copy of the content of the original
+NALIST to the buffer-local NALIST to avoid their sharing cons
+cells.
+
+It also sets the default value of NALIST nil to avoid variables
+in other buffers share the cons cells through it."
   (let ((copy (gensym)))
     `(let ((,copy ,nalist))
        (setq ,nalist nil)
@@ -138,15 +139,15 @@ their sharing of cons cells."
   `(setq ,nalist nil))
 
 (cl-defmacro nalist-set (key value nalist &key (testfn 'eq))
-  "Set a pair with KEY and VALUE in NALIST by finding KEY with TESTFN.
+  "Find a pair with KEY in NALIST with TESTFN, and set its value VALUE.
 
 It destructively changes the value of KEY with VALUE if their is
-a pair with KEY already, otherwise creates a new pair with KEY and
+already a pair with KEY, otherwise creates a new pair with KEY and
 VALUE."
   `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
-  "Return the value of KEY in NALIST if exists TESTFN-wise, otherwise DEFAULT."
+  "Return the value of KEY in NALIST if it exists TESTFN-wise, otherwise DEFAULT."
   (alist-get key nalist default nil testfn))
 
 (cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
@@ -154,22 +155,22 @@ VALUE."
   `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
 
 (defun nalist-pairs (nalist)
-  "Return a list of all pairs in NALIST."
+  "Return a list consisting all the pairs in NALIST."
   (copy-alist nalist))
 
 (defun nalist-keys (nalist)
-  "Return a list of all keys in NALIST."
+  "Return a list consisting all the keys in NALIST."
   (mapcar 'car nalist))
 
 (defun nalist-values (nalist)
-  "Retrun a list of all values in NALIST."
+  "Return a list consisting all the values in NALIST."
   (mapcar 'cdr nalist))
 
 (cl-defmacro nalist-copy (nalist-old nalist-new &key shallow)
-  "Create NALIST-NEW by SHALLOW or deep copying NALIST-OLD.
+  "Copy and bind the content of NALIST-OLD to NALIST-NEW.
 
-Shallow-copy the content of NALIST-NEW if SHALLOW is non-nil,
-otherwise deep-copy it."
+This macro uses shallow-copy if SHALLOW is non-nil, otherwise it
+uses deep-copy."
   `(progn
      (unless (nalist-nalist-p ,nalist-old)
        (error "Invalid initial value: `%s'" ,nalist-old))
@@ -179,7 +180,7 @@ otherwise deep-copy it."
      ',nalist-new))
 
 (defmacro nalist-pop (key nalist)
-  "Remove the pair with KEY from NALIST and return it."
+  "Remove the pair with KEY from NALIST, and return the value of the pair."
   (let ((before (gensym))
         (after (gensym))
         (pair (gensym))
@@ -197,7 +198,7 @@ otherwise deep-copy it."
          (push ,pair ,before)))))
 
 (defmacro nalist-poppair (nalist)
-  "Remove a pair from NALIST and return it."
+  "Remove a pair from NALIST, and return it."
   `(prog1
        (car ,nalist)
      (setq ,nalist (cdr ,nalist))))
@@ -228,9 +229,9 @@ FUNCTION is called with two arguments, KEY and VALUE.
   (equal nalist-a nalist-b))
 
 (defun nalist-set-equal (nalist-a nalist-b &optional testfn)
-  "Check with TESTFN if NALIST-A and NALIST-B have the same pairs.
+  "Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
 
-If so, return t, otherwise nil.  The default TESTFN is `equal'."
+Return t if so, otherwise nil.  The default TESTFN is `equal'."
   (seq-set-equal-p nalist-a nalist-b testfn))
 
 
