@@ -113,15 +113,62 @@
   (should-not (nalist-proper-list-p '#1=(#2=(a) (#2#) . #1#)))
   (should-not (nalist-proper-list-p '#1=(#2=(#3=(a . #1#) . #2#) . #3#))))
 
-(ert-deftest nalist-nalist-p-test ()
-  (should (nalist-nalist-p nil))
-  (should-not (nalist-nalist-p '(a)))
-  (should-not (nalist-nalist-p '(a . b)))
-  (should-not (nalist-nalist-p '(a  b)))
-  (should (nalist-nalist-p '((a . b))))
-  (should-not (nalist-nalist-p '(nil . (a . b))))
-  (should-not (nalist-nalist-p '((a . b) . (c . d))))
+(ert-deftest nalist-nalist-p-test/nil ()
+  (should (nalist-nalist-p nil)))
+
+(ert-deftest nalist-nalist-p-test/symbol ()
+  (should-not (nalist-nalist-p 'a)))
+
+(ert-deftest nalist-nalist-p-test/string-as-non-trivial-atom ()
+  (should-not (nalist-nalist-p "foo")))
+
+(ert-deftest nalist-nalist-p-test/pair ()
+  (should-not (nalist-nalist-p '(a . b))))
+
+(ert-deftest nalist-nalist-p-test/proper-list ()
+  (should-not (nalist-nalist-p '(a b))))
+
+(ert-deftest nalist-nalist-p-test/circular-list ()
+  (should-not (nalist-nalist-p '#1=(a #1#))))
+
+(ert-deftest nalist-nalist-p-test/alist-1-pair ()
+  (should (nalist-nalist-p '((a . b)))))
+
+(ert-deftest nalist-nalist-p-test/alist-2-pairs ()
   (should (nalist-nalist-p '((a . b) (c . d)))))
+
+(ert-deftest nalist-nalist-p-test/alist-3-pairs ()
+  (should (nalist-nalist-p '((a . b) (nil) (c . d)))))
+
+(ert-deftest nalist-nalist-p-test/broken-alist-1 ()
+  (should-not (nalist-nalist-p '((a . b) nil (c . d)))))
+
+(ert-deftest nalist-nalist-p-test/broken-alist-2 ()
+  (should-not (nalist-nalist-p '((a . b) c (d  e)))))
+
+(ert-deftest nalist-nalist-p-test/broken-alist-3 ()
+  (should-not (nalist-nalist-p '((a . b) (c . d) . (e . f)))))
+
+(ert-deftest nalist-init-test/basic-literal ()
+  (with-unbound-symbols ('na)
+    (nalist-init na '((a . b) (c . d)))
+    (should (nalist-set-equal na '((a . b) (c . d))))))
+
+(ert-deftest nalist-init-test/basic-variable-deep ()
+  (with-unbound-symbols ('alist 'na)
+    (setq alist (copy-alist '((a . b) (c . d))))
+    (nalist-init na alist)
+    (should (nalist-set-equal na '((a . b) (c . d))))
+    (setcar na '(x . y))
+    (should (nalist-set-equal alist '((a . b) (c . d))))))
+
+(ert-deftest nalist-init-test/basic-variable-shallow ()
+  (with-unbound-symbols ('alist 'na)
+    (setq alist (copy-alist '((a . b) (c . d))))
+    (nalist-init na alist :shallow t)
+    (should (nalist-set-equal na '((a . b) (c . d))))
+    (setcar na '(x . y))
+    (should (nalist-set-equal alist '((x . y) (c . d))))))
 
 (ert-deftest nalist-init-test ()
   (setq alist '((x . y) (z . a)))

@@ -26,6 +26,19 @@
 
 ;;; Code:
 
+(defun nalist-helper-compose-unbound-forms (sym-list)
+  "Compose forms from SYM-LIST for `with-unbound-symbols'."
+  (mapcar #'(lambda (sym)
+              `(makunbound ,sym))
+          sym-list))
+
+(defmacro with-unbound-symbols (sym-list &rest body)
+  "Unbound all the vars in SYM-LIST before executing BODY."
+  (declare (indent 1))
+  `(progn
+     ,@(nalist-helper-compose-unbound-forms sym-list)
+     ,@body))
+
 (defun nalist-helper-compose-forms (var-list)
   "Compose forms from VAR-LIST for `with-temp-conses'."
   (mapcar #'(lambda (var)
@@ -34,7 +47,7 @@
 
 (defmacro with-temp-conses (var-list &rest body)
   "Destruct all conses the variables in VAR-LIST bound, after executing BODY."
-  (declare (indent 2))
+  (declare (indent 1))
   `(unwind-protect
        (progn
          ,@body)

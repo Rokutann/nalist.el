@@ -79,10 +79,17 @@
 
 (ert-deftest nalist-helper-with-temp-conses/two-vars ()
   (with-temp-conses (alist blist)
-      (setq alist '(a . b))
+    (setq alist '(a . b))
     (setq blist '(c . d)))
   (should (eq alist nil))
   (should (eq blist nil)))
 
+(ert-deftest nalist-helper-with-unbound-vars ()
+  (setq var-1 1)
+  (setq var-2 2)
+  (with-unbound-symbols ('var-1 'var-2)
+    (should-not (boundp 'var-1))
+    (should-not (boundp 'var-2)))
+  )
 
 ;;; nalist-helper-test.el ends here.
