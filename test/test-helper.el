@@ -26,6 +26,20 @@
 
 ;;; Code:
 
+(defun nalist-helper-compose-forms (var-list)
+  "Compose forms from VAR-LIST for `with-temp-conses'."
+  (mapcar #'(lambda (var)
+              `(nalist-helper-totally-destruct-cons ,var))
+          var-list))
+
+(defmacro with-temp-conses (var-list &rest body)
+  "Destruct all conses the variables in VAR-LIST bound, after executing BODY."
+  (declare (indent 2))
+  `(unwind-protect
+       (progn
+         ,@body)
+     ,@(nalist-helper-compose-forms var-list)))
+
 (defmacro with-nalist-fixture (&rest body)
   `(unwind-protect
        (progn
@@ -43,11 +57,10 @@
 
 OBJ should be a cons cell or a symbol refers a con cell."
   `(prog1
-       (if (symbolp ',obj)
-           (progn
-             (nalist-helper-chop-all-leaves ,obj)
-             (setq ,obj nil))
+       (unless (atom ,obj)
          (nalist-helper-chop-all-leaves ,obj))
+     (when (symbolp ',obj)
+       (setq ,obj nil))
      (garbage-collect)))
 
 (defun nalist-helper-chop-all-leaves (cons-cell)

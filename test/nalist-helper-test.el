@@ -31,36 +31,58 @@
   (nalist-helper-totally-destruct-cons obj)
   (should (eq obj nil)))
 
+(ert-deftest nalist-helper-totally-destruct-cons-test/atom ()
+  (setq obj 'a)
+  (nalist-helper-totally-destruct-cons obj)
+  (should (eq obj nil)))
+
 (ert-deftest nalist-helper-totally-destruct-cons-test/cons ()
   (setq obj '(a . b))
-  (setq blist obj)
+  (setq ref obj)
   (nalist-helper-totally-destruct-cons obj)
   (should (eq obj nil))
-  (should (equal blist '(nil))))
+  (should (equal ref '(nil))))
 
 (ert-deftest nalist-helper-totally-destruct-cons-test/list ()
   (setq obj '(a b))
-  (setq blist obj)
+  (setq ref obj)
   (nalist-helper-totally-destruct-cons obj)
   (should (eq obj nil))
-  (should (equal blist '(nil))))
+  (should (equal ref '(nil))))
 
 (ert-deftest nalist-helper-totally-destruct-cons-test/long-list ()
   (setq obj '(a b c d e f g h i j k l m n o p q r s t u v w x y z))
-  (setq blist obj)
+  (setq ref obj)
   (nalist-helper-totally-destruct-cons obj)
   (should (eq obj nil))
-  (should (equal blist '(nil))))
+  (should (equal ref '(nil))))
 
 (ert-deftest nalist-helper-totally-destruct-cons-test/deep-list ()
   (setq obj '(((((a) b) c) d) (e (f (g (h (i (j))))))) )
-  (setq blist obj)
+  (setq ref obj)
   (nalist-helper-totally-destruct-cons obj)
   (should (eq obj nil))
-  (should (equal blist '(nil))))
+  (should (equal ref '(nil))))
 
 (ert-deftest nalist-helper-totally-destruct-cons-test/list-literal ()
   (should (eq (nalist-helper-totally-destruct-cons '(a b)) nil)))
+
+(ert-deftest nalist-helper-with-temp-conses/nil ()
+  (with-temp-conses nil
+      (setq alist '(a . b)))
+  (should (equal alist '(a . b))))
+
+(ert-deftest nalist-helper-with-temp-conses/one-var ()
+  (with-temp-conses (alist)
+      (setq alist '(a . b)))
+  (should (eq alist nil)))
+
+(ert-deftest nalist-helper-with-temp-conses/two-vars ()
+  (with-temp-conses (alist blist)
+      (setq alist '(a . b))
+    (setq blist '(c . d)))
+  (should (eq alist nil))
+  (should (eq blist nil)))
 
 
 ;;; nalist-helper-test.el ends here.
