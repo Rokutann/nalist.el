@@ -26,7 +26,7 @@
 
 ;;; Code:
 
-(ert-deftest test-nalist-proper-list-p-circular ()
+(ert-deftest nalist-proper-list-p-test/circular ()
   (should-not (nalist-proper-list-p '#1=(#1# . #1#)))
   (should (nalist-proper-list-p '#1=(#1#  #1#)))
   (should-not (nalist-proper-list-p '#1=(#2=(#1# . #2#) . #1#)))
@@ -37,7 +37,7 @@
   (should-not (nalist-proper-list-p '#1=(#2=(a) (#2#) . #1#)))
   (should-not (nalist-proper-list-p '#1=(#2=(#3=(a . #1#) . #2#) . #3#))))
 
-(ert-deftest test-nalist-proper-list-p ()
+(ert-deftest nalist-proper-list-p-test ()
   (should (nalist-proper-list-p nil))
   (should (nalist-proper-list-p '(a)))
   (should-not (nalist-proper-list-p '(a . b)))
@@ -48,7 +48,7 @@
   (should-not (nalist-proper-list-p '((a . b) . (c . d))))
   (should (nalist-proper-list-p '((a . b)  (c . d)))))
 
-(ert-deftest test-nalist-pairp ()
+(ert-deftest nalist-pairp-test ()
   (should-not(nalist-pairp nil))
   (should-not (nalist-pairp 'a))
   (should (nalist-pairp '(a)))
@@ -56,7 +56,7 @@
   (should (nalist-pairp '(a . b)))
   (should (nalist-pairp '(a b))))
 
-(ert-deftest test-nalist-nalist-p ()
+(ert-deftest nalist-nalist-p-test ()
   (should (nalist-nalist-p nil))
   (should-not (nalist-nalist-p '(a)))
   (should-not (nalist-nalist-p '(a . b)))
@@ -66,7 +66,7 @@
   (should-not (nalist-nalist-p '((a . b) . (c . d))))
   (should (nalist-nalist-p '((a . b) (c . d)))))
 
-(ert-deftest test-nalist-init ()
+(ert-deftest nalist-init-test ()
   (setq alist '((x . y) (z . a)))
   (nalist-init na-shallow alist :shallow t)
   (nalist-init na-deep alist)
@@ -79,34 +79,27 @@
               'na-1))
   (should-error (nalist-init na-2 'a)))
 
-(ert-deftest test-nalist-equal ()
-  (should (nalist-equal nal
-                        '((a . b) (c . d))))
-  (should (not (nalist-equal nal
-                             '((c . d) (a . b))))))
+(ert-deftest nalist-equal-test ()
+  (should (nalist-equal nal '((a . b) (c . d))))
+  (should (not (nalist-equal nal '((c . d) (a . b))))))
 
-(ert-deftest test-nalist-map ()
+(ert-deftest nalist-map-test ()
   (with-nalist-fixture
    (let ((res nil))
      (nalist-map #'(lambda (k v) (push k res)) nal-4)
-     (should (seq-set-equal-p res '(a c e g)))
-     )))
+     (should (seq-set-equal-p res '(a c e g))))))
 
-(ert-deftest test-nalist-pop ()
+(ert-deftest nalist-pop-test ()
   (with-nalist-fixture
-   (should (eq (nalist-pop 'e nal-4)
-               'f))
-   (should (nalist-set-equal nal-4
-                             '((a . b) (c . d) (g . h))))))
+   (should (eq (nalist-pop 'e nal-4) 'f))
+   (should (nalist-set-equal nal-4 '((a . b) (c . d) (g . h))))))
 
-(ert-deftest test-nalist-poppair ()
+(ert-deftest nalist-poppair-test ()
   (with-nalist-fixture
-   (should (equal (nalist-poppair nal-4)
-                  '(a . b)))
-   (should (nalist-set-equal nal-4
-                             '((c . d) (e . f) (g . h))))))
+   (should (equal (nalist-poppair nal-4) '(a . b)))
+   (should (nalist-set-equal nal-4 '((c . d) (e . f) (g . h))))))
 
-(ert-deftest test-nalist-copy ()
+(ert-deftest nalist-copy-test ()
   (with-nalist-fixture
    (nalist-copy nal nal-deep)
    (nalist-copy nal nal-shallow :shallow t)
@@ -116,33 +109,31 @@
    (setq not-nalist 'a)
    (should-error (nalist-copy not-nalist nal-new))))
 
-(ert-deftest test-nalist-values ()
+(ert-deftest nalist-values-test ()
   (with-nalist-fixture
-   (should (seq-set-equal-p (nalist-values nal)
-                            '(b d)))))
+   (should (seq-set-equal-p (nalist-values nal) '(b d)))))
 
-(ert-deftest test-nalist-pairs ()
+(ert-deftest nalist-pairs-test ()
   (with-nalist-fixture
-   (should (nalist-set-equal (nalist-pairs nal)
-                             '((a . b) (c . d))))
+   (should (nalist-set-equal (nalist-pairs nal) '((a . b) (c . d))))
    (should-not (eq (nalist-pairs nal) nal))))
 
-(ert-deftest test-nalist-keys ()
+(ert-deftest nalist-keys-test ()
   (with-nalist-fixture
    (should (seq-set-equal-p (nalist-keys nal) '(a c)))))
 
-(ert-deftest test-nalist-subset-p ()
+(ert-deftest nalist-subset-p-test ()
   (should (nalist-subset-p '((a . 1)) '((b . 2) (a . 1)))))
 
-(ert-deftest test-nalist-equal ()
+(ert-deftest nalist-equal-test ()
   (should (nalist-set-equal '((a . 1) (b . 2)) '((b . 2) (a . 1)))))
 
-(ert-deftest test-nalist-clear ()
+(ert-deftest nalist-clear-test ()
   (with-nalist-fixture
    (nalist-clear nal)
    (should (eq nal nil))))
 
-(ert-deftest test-nalist-get ()
+(ert-deftest nalist-get-test ()
   (with-nalist-fixture
    (should (eq (nalist-get 'a nal) 'b))
    (should (eq (nalist-get 'b nal) nil))
@@ -159,14 +150,14 @@
    (should (eq (nalist-get 'a nal :default 'no-value) 'b))
    (should (eq (nalist-get 'f nal :default 'no-value) 'no-value))))
 
-(ert-deftest test-nalist-set ()
+(ert-deftest nalist-set-test ()
   (with-nalist-fixture
    (nalist-set 'e 'f nal)
    (should (nalist-set-equal nal '((a . b) (c . d) (e . f))))
    (nalist-set 'c 'g nal)
    (should (nalist-set-equal nal '((a . b) (c . g) (e . f))))))
 
-(ert-deftest test-lexical-binding ()
+(ert-deftest lexical-binding-test ()
   (setq closure nil)
   (nalist-init nal '((v . w) (x . y)))
   (let ((nal nil))
@@ -178,7 +169,7 @@
   (should (nalist-set-equal (funcall closure 'a 'e) '((a . e) (c . d))))
   (should (nalist-set-equal nal '((v . w) (x . y)))))
 
-(ert-deftest test-nalist-remove ()
+(ert-deftest nalist-remove-test ()
   (with-nalist-fixture
    (nalist-remove 'a nal)
    (should (nalist-set-equal nal '((c . d))))))
