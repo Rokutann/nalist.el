@@ -28,7 +28,7 @@ Bind ALIST to SYMBOL if SHALLOW is t, otherwise a deep copy of ALIST.
 
 ### nalist-get `(key nalist &key default (testfn 'eq))`
 
-Return the value of KEY in NALIST if exists TESTFN-wise, otherwise DEFAULT.
+Return the value of KEY in NALIST if it exists TESTFN-wise, otherwise DEFAULT.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
 
@@ -41,10 +41,10 @@ Return the value of KEY in NALIST if exists TESTFN-wise, otherwise DEFAULT.
 
 ### nalist-set `(key value nalist &key (testfn 'eq))`
 
-Set a pair with KEY and VALUE in NALIST by finding KEY with TESTFN.
+Find a pair with KEY in NALIST with TESTFN, and set its value VALUE.
 
 It destructively changes the value of KEY with VALUE if their is
-a pair with KEY already, otherwise creates a new pair with KEY and
+already a pair with KEY, otherwise creates a new pair with KEY and
 VALUE.
 
 (fn KEY VALUE NALIST &key (TESTFN 'eq))
@@ -67,7 +67,7 @@ Remove the pair with KEY from NALIST if KEY exists TESTFN-wise.
 
 ### nalist-pop `(key nalist)`
 
-Remove the pair with KEY from NALIST and return it.
+Remove the pair with KEY from NALIST, and return the value of the pair.
 
 ```lisp
 (nalist-pop 'c nal-1) ;; => 'd
@@ -76,7 +76,7 @@ Remove the pair with KEY from NALIST and return it.
 
 ### nalist-poppair `(nalist)`
 
-Remove a pair from NALIST and return it.
+Remove a pair from NALIST, and return it.
 
 ```lisp
 (nalist-poppair nal-1) ;; => '(a . b)
@@ -85,7 +85,7 @@ Remove a pair from NALIST and return it.
 
 ### nalist-pairs `(nalist)`
 
-Return a list of all pairs in NALIST.
+Return a list consisting all the pairs in NALIST.
 
 ```lisp
 (nalist-pairs nal-1) ;; => '((a . b) (c . d))
@@ -93,7 +93,7 @@ Return a list of all pairs in NALIST.
 
 ### nalist-keys `(nalist)`
 
-Return a list of all keys in NALIST.
+Return a list consisting all the keys in NALIST.
 
 ```lisp
 (nalist-keys nal-1) ;; => '(a c)
@@ -101,7 +101,7 @@ Return a list of all keys in NALIST.
 
 ### nalist-values `(nalist)`
 
-Retrun a list of all values in NALIST.
+Return a list consisting all the values in NALIST.
 
 ```lisp
 (nalist-values nal-1) ;; => '(b d)
@@ -109,10 +109,10 @@ Retrun a list of all values in NALIST.
 
 ### nalist-copy `(nalist-old nalist-new &key shallow)`
 
-Create NALIST-NEW by SHALLOW or deep copying NALIST-OLD.
+Copy and bind the content of NALIST-OLD to NALIST-NEW.
 
-Shallow-copy the content of NALIST-NEW if SHALLOW is non-nil,
-otherwise deep-copy it.
+This macro uses shallow-copy if SHALLOW is non-nil, otherwise it
+uses deep-copy.
 
 (fn NALIST-OLD NALIST-NEW &key SHALLOW)
 
@@ -168,7 +168,7 @@ A proper list is a non circular cons chain whose last cdr points nil.
 
 ### nalist-nalist-p `(obj)`
 
-Return t if OBJ is alist, otherwise nil.
+Return t if OBJ is an alist, otherwise nil.
 
 ```lisp
 (nalist-nalist-p nil) ;; => t
@@ -197,9 +197,9 @@ Return t if NALIST-A nad NALIST-B are identical ‘equal’-wise, otherwise nil.
 
 ### nalist-set-equal `(nalist-a nalist-b &optional testfn)`
 
-Check with TESTFN if NALIST-A and NALIST-B have the same pairs.
+Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
 
-If so, return t, otherwise nil.  The default TESTFN is ‘equal’.
+Return t if so, otherwise nil.  The default TESTFN is ‘equal’.
 
 ```lisp
 (nalist-set-equal nal-1 '((a . b) (c . d)))) ;; => t
