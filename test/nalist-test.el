@@ -149,12 +149,12 @@
 (ert-deftest nalist-nalist-p-test/broken-alist-3 ()
   (should-not (nalist-nalist-p '((a . b) (c . d) . (e . f)))))
 
-(ert-deftest nalist-init-test/basic-literal ()
+(ert-deftest nalist-init-test/literal ()
   (with-unbound-symbols ('na)
     (nalist-init na '((a . b) (c . d)))
     (should (nalist-set-equal na '((a . b) (c . d))))))
 
-(ert-deftest nalist-init-test/basic-variable-deep ()
+(ert-deftest nalist-init-test/variable-deep ()
   (with-unbound-symbols ('alist 'na)
     (setq alist (copy-alist '((a . b) (c . d))))
     (nalist-init na alist)
@@ -162,7 +162,7 @@
     (setcar na '(x . y))
     (should (nalist-set-equal alist '((a . b) (c . d))))))
 
-(ert-deftest nalist-init-test/basic-variable-shallow ()
+(ert-deftest nalist-init-test/variable-shallow ()
   (with-unbound-symbols ('alist 'na)
     (setq alist (copy-alist '((a . b) (c . d))))
     (nalist-init na alist :shallow t)
@@ -170,22 +170,78 @@
     (setcar na '(x . y))
     (should (nalist-set-equal alist '((x . y) (c . d))))))
 
-(ert-deftest nalist-init-test ()
-  (setq alist '((x . y) (z . a)))
-  (nalist-init na-shallow alist :shallow t)
-  (nalist-init na-deep alist)
-  (nalist-init na-nil nil)
-  (should (eq alist na-shallow))
-  (should-not (eq alist na-deep))
-  (should (equal alist na-deep))
-  (should (eq na-nil nil))
-  (should (eq (nalist-init na-1 '((a . b) (c . d)))
-              'na-1))
-  (should-error (nalist-init na-2 'a)))
+(ert-deftest nalist-init-test/not-an-alist ()
+  (with-unbound-symbols ('na)
+    (should-error (nalist-init na 'a))))
 
-(ert-deftest nalist-equal-test ()
-  (should (nalist-equal nal '((a . b) (c . d))))
-  (should (not (nalist-equal nal '((c . d) (a . b))))))
+(ert-deftest nalist-equal-test/nil-nil ()
+  (should (nalist-equal nil nil)))
+
+(ert-deftest nalist-equal-test/nil-atom ()
+  (should-not (nalist-equal nil "foo")))
+
+(ert-deftest nalist-equal-test/atom-nil ()
+  (should-not (nalist-equal "foo" nil)))
+
+(ert-deftest nalist-equal-test/nil-symbol ()
+  (should-not (nalist-equal nil 'foo)))
+
+(ert-deftest nalist-equal-test/symbol-nil ()
+  (should-not (nalist-equal 'foo nil)))
+
+(ert-deftest nalist-equal-test/cons-nil ()
+  (should-not (nalist-equal '(a . b) nil)))
+
+(ert-deftest nalist-equal-test/nil-cons ()
+  (should-not (nalist-equal nil '(a . b))))
+
+(ert-deftest nalist-equal-test/cons-cons-t ()
+  (should (nalist-equal '(a . b) '(a . b))))
+
+(ert-deftest nalist-equal-test/cons-cons-nil ()
+  (should-not (nalist-equal '(a . b) '(a . x))))
+
+(ert-deftest nalist-equal-test/alist-alist-t ()
+  (should (nalist-equal '((a . b) (c . d)) '((a . b) (c . d)))))
+
+(ert-deftest nalist-equal-test/alist-alist-nil ()
+  (should-not (nalist-equal '((a . b) (c . d)) '((c . d) (a . b)))))
+
+(ert-deftest nalist-set-equal-test/nil-nil ()
+  (should (nalist-set-equal nil nil)))
+
+(ert-deftest nalist-set-equal-test/nil-atom ()
+  (should-not (nalist-set-equal nil "foo")))
+
+(ert-deftest nalist-set-equal-test/atom-nil ()
+  (should-not (nalist-set-equal "foo" nil)))
+
+(ert-deftest nalist-set-equal-test/nil-symbol ()
+  (should-error (nalist-set-equal nil 'foo)))
+
+(ert-deftest nalist-set-equal-test/symbol-nil ()
+  (should-error (nalist-set-equal 'foo nil)))
+
+(ert-deftest nalist-set-equal-test/cons-nil ()
+  (should-error (nalist-set-equal '(a . b) nil)))
+
+(ert-deftest nalist-set-equal-test/nil-cons ()
+  (should-error (nalist-set-equal nil '(a . b))))
+
+(ert-deftest nalist-set-equal-test/cons-cons-t ()
+  (should-error (nalist-set-equal '(a . b) '(a . b))))
+
+(ert-deftest nalist-set-equal-test/cons-cons-nil ()
+  (should-error (nalist-set-equal '(a . b) '(a . x))))
+
+(ert-deftest nalist-set-equal-test/alist-alist-t ()
+  (should-not (nalist-set-equal '((a . b) (c . d)) '((a . b) (c . x)))))
+
+(ert-deftest nalist-set-equal-test/alist-alist-t ()
+  (should (nalist-set-equal '((a . b) (c . d)) '((a . b) (c . d)))))
+
+(ert-deftest nalist-set-equal-test/alist-alist-nil ()
+  (should (nalist-set-equal '((a . b) (c . d)) '((c . d) (a . b)))))
 
 (ert-deftest nalist-map-test ()
   (with-nalist-fixture
