@@ -26,9 +26,85 @@
 
 ;;; Code:
 
-(ert-deftest nalist-proper-list-p-test/circular ()
-  (should-not (nalist-proper-list-p '#1=(#1# . #1#)))
-  (should (nalist-proper-list-p '#1=(#1#  #1#)))
+(ert-deftest nalist-pairp-test/nil ()
+  (should-not(nalist-pairp nil)))
+
+(ert-deftest nalist-pairp-test/symbol ()
+  (should-not (nalist-pairp 'a)))
+
+(ert-deftest nalist-pairp-test/string-as-non-trivial-atom ()
+  (should-not (nalist-pairp "foo")))
+
+(ert-deftest nalist-pairp-test/cons ()
+  (should (nalist-pairp '(a . b))))
+
+(ert-deftest nalist-pairp-test/list ()
+  (should (nalist-pairp '(a b))))
+
+(ert-deftest nalist-proper-list-p-test/nil ()
+  (should (nalist-proper-list-p nil)))
+
+(ert-deftest nalist-proper-list-p-test/symbol ()
+  (should-not (nalist-proper-list-p 'a)))
+
+(ert-deftest nalist-proper-list-p-test/string-as-non-trivial-atom ()
+  (should-not (nalist-proper-list-p "foo")))
+
+(ert-deftest nalist-proper-list-p-test/cons ()
+  (should-not (nalist-proper-list-p '(a . b))))
+
+(ert-deftest nalist-proper-list-p-test/list ()
+  (should (nalist-proper-list-p '(a b))))
+
+(ert-deftest nalist-proper-list-p-test/long-cons ()
+  (should-not (nalist-proper-list-p '(a b c d e f g h i j k l m n . o))))
+
+(ert-deftest nalist-proper-list-p-test/long-list ()
+  (should (nalist-proper-list-p '(a b c d e f g h i j k l m n o))))
+
+(ert-deftest nalist-proper-list-p-test/deep-cons ()
+  (should-not (nalist-proper-list-p '(e (((c ((a) ((b)) )) . d)) (((b . f) j)) . o))))
+
+(ert-deftest nalist-proper-list-p-test/deep-list ()
+  (should (nalist-proper-list-p '(((i j ((e))) (f) (g h) a) (b (c d))))))
+
+(ert-deftest nalist-proper-list-p-test/alist-one ()
+  (should (nalist-proper-list-p '((a . b)))))
+
+(ert-deftest nalist-proper-list-p-test/alist-long ()
+  (should (nalist-proper-list-p '((a . b) (c . d) (e . f) (g . h) (i . j) (k . l) (m . n) (o . p)))))
+
+(ert-deftest nalist-proper-list-p-test/circular-1-periodic ()
+  (should-not (nalist-proper-list-p '#1=(a . #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-2-periodic ()
+  (should-not (nalist-proper-list-p '#1=(a b . #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-3-periodic ()
+  (should-not (nalist-proper-list-p '#1=(a b c . #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-4-periodic ()
+  (should-not (nalist-proper-list-p '#1=(a b c d . #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-5-periodic ()
+  (should-not (nalist-proper-list-p '#1=(a b c d e . #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-just-sharing-1-step ()
+  (should (nalist-proper-list-p '#1=(#1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-just-sharing-2-steps ()
+  (should (nalist-proper-list-p '#1=(a #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-just-sharing-3-steps ()
+  (should (nalist-proper-list-p '#1=(a b #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-just-sharing-4-steps ()
+  (should (nalist-proper-list-p '#1=(a b c #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-just-sharing-5-steps ()
+  (should (nalist-proper-list-p '#1=(a b c d #1#))))
+
+(ert-deftest nalist-proper-list-p-test/circular-misc ()
   (should-not (nalist-proper-list-p '#1=(#2=(#1# . #2#) . #1#)))
   (should (nalist-proper-list-p '#1=(#2=(#1# . #4=#1#) . #3=(#4# . #2#))))
   (should (nalist-proper-list-p '(#1=(a) . #1#)))
@@ -36,25 +112,6 @@
   (should (nalist-proper-list-p '(#1=(a) b #1#)))
   (should-not (nalist-proper-list-p '#1=(#2=(a) (#2#) . #1#)))
   (should-not (nalist-proper-list-p '#1=(#2=(#3=(a . #1#) . #2#) . #3#))))
-
-(ert-deftest nalist-proper-list-p-test ()
-  (should (nalist-proper-list-p nil))
-  (should (nalist-proper-list-p '(a)))
-  (should-not (nalist-proper-list-p '(a . b)))
-  (should (nalist-proper-list-p '(a  b)))
-  (should-not (nalist-proper-list-p '((a . b) . c)))
-  (should-not (nalist-proper-list-p '(a  b . c)))
-  (should (nalist-proper-list-p '((a . b)  c)))
-  (should-not (nalist-proper-list-p '((a . b) . (c . d))))
-  (should (nalist-proper-list-p '((a . b)  (c . d)))))
-
-(ert-deftest nalist-pairp-test ()
-  (should-not(nalist-pairp nil))
-  (should-not (nalist-pairp 'a))
-  (should (nalist-pairp '(a)))
-  (should (nalist-pairp '(nil . a)))
-  (should (nalist-pairp '(a . b)))
-  (should (nalist-pairp '(a b))))
 
 (ert-deftest nalist-nalist-p-test ()
   (should (nalist-nalist-p nil))
