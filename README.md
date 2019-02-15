@@ -209,7 +209,7 @@ Return t if NALIST-A nad NALIST-B are identical with ‘equal’, otherwise nil.
 (nalist-equal nal-1 '((c . d) (a . b)))) ;; => nil
 ```
 
-### nalist-set-equal-p `(nalist-a nalist-b &key (testfn 'equal)`
+### nalist-set-equal-p `(nalist-a nalist-b)`
 
 Test with ‘equal’ if NALIST-A and NALIST-B have the same set of pairs.
 

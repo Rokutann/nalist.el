@@ -173,7 +173,7 @@ your Emacs config:
 (nalist-equal nal-1 '((c . d) (a . b)))) ;; => nil
 ```
 
-### nalist-set-equal-p `(nalist-a nalist-b &key (testfn 'equal)`
+### nalist-set-equal-p `(nalist-a nalist-b)`
 
 {{nalist-set-equal-p}}
 

@@ -5,7 +5,7 @@
 ;; Author: Cyriakus "Mukuge" Hill <cyriakus.h@gmail.com>
 ;; Keywords: Lisp, tools
 ;; URL: https://github.com/mukuge/nalist.el
-;; Package-Version: 0.0.1
+;; Package-Version: 0.1.0
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
