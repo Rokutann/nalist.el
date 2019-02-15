@@ -270,40 +270,40 @@
 (ert-deftest nalist-equal-test/alist-alist-nil ()
   (should-not (nalist-equal '((a . b) (c . d)) '((c . d) (a . b)))))
 
-;;; nalist-set-equal
+;;; nalist-set-equal-p
 
-(ert-deftest nalist-set-equal-test/nil-nil ()
-  (should (nalist-set-equal nil nil)))
+(ert-deftest nalist-set-equal-p-test/nil-nil ()
+  (should (nalist-set-equal-p nil nil)))
 
-(ert-deftest nalist-set-equal-test/nil-atom ()
-  (should-assertion-error (nalist-set-equal nil "foo")))
+(ert-deftest nalist-set-equal-p-test/nil-atom ()
+  (should-assertion-error (nalist-set-equal-p nil "foo")))
 
-(ert-deftest nalist-set-equal-test/atom-nil ()
-  (should-assertion-error (nalist-set-equal "foo" nil)))
+(ert-deftest nalist-set-equal-p-test/atom-nil ()
+  (should-assertion-error (nalist-set-equal-p "foo" nil)))
 
-(ert-deftest nalist-set-equal-test/nil-symbol ()
-  (should-assertion-error (nalist-set-equal nil 'foo)))
+(ert-deftest nalist-set-equal-p-test/nil-symbol ()
+  (should-assertion-error (nalist-set-equal-p nil 'foo)))
 
-(ert-deftest nalist-set-equal-test/symbol-nil ()
-  (should-assertion-error (nalist-set-equal 'foo nil)))
+(ert-deftest nalist-set-equal-p-test/symbol-nil ()
+  (should-assertion-error (nalist-set-equal-p 'foo nil)))
 
-(ert-deftest nalist-set-equal-test/cons-nil ()
-  (should-assertion-error (nalist-set-equal '(a . b) nil)))
+(ert-deftest nalist-set-equal-p-test/cons-nil ()
+  (should-assertion-error (nalist-set-equal-p '(a . b) nil)))
 
-(ert-deftest nalist-set-equal-test/nil-cons ()
-  (should-assertion-error (nalist-set-equal nil '(a . b))))
+(ert-deftest nalist-set-equal-p-test/nil-cons ()
+  (should-assertion-error (nalist-set-equal-p nil '(a . b))))
 
-(ert-deftest nalist-set-equal-test/cons-cons ()
-  (should-assertion-error (nalist-set-equal '(a . b) '(a . b))))
+(ert-deftest nalist-set-equal-p-test/cons-cons ()
+  (should-assertion-error (nalist-set-equal-p '(a . b) '(a . b))))
 
-(ert-deftest nalist-set-equal-test/alist-alist-nil ()
-  (should-not (nalist-set-equal '((a . b) (c . d)) '((a . b) (c . x)))))
+(ert-deftest nalist-set-equal-p-test/alist-alist-nil ()
+  (should-not (nalist-set-equal-p '((a . b) (c . d)) '((a . b) (c . x)))))
 
-(ert-deftest nalist-set-equal-test/alist-alist-t ()
-  (should (nalist-set-equal '((a . b) (c . d)) '((a . b) (c . d)))))
+(ert-deftest nalist-set-equal-p-test/alist-alist-t ()
+  (should (nalist-set-equal-p '((a . b) (c . d)) '((a . b) (c . d)))))
 
-(ert-deftest nalist-set-equal-test/alist-alist-nil ()
-  (should (nalist-set-equal '((a . b) (c . d)) '((c . d) (a . b)))))
+(ert-deftest nalist-set-equal-p-test/alist-alist-nil ()
+  (should (nalist-set-equal-p '((a . b) (c . d)) '((c . d) (a . b)))))
 
 ;;; nalist-map
 

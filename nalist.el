@@ -37,8 +37,8 @@
 (defun nalist-pairp (obj)
   "Return t if OBJ is a pair, otherwise nil.
 
-A pair is a cons cell, regardless of what Lisp objects its `car'
-and `cdr' point."
+A pair is a cons cell, regardless of what Lisp objects its car
+and cdr point."
   (consp obj))
 
 (defun nalist-proper-list-p (obj)
@@ -234,7 +234,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a subset of NALIST-B with 'equal, otherwise nil."
+  "Return t if NALIST-A is a subset of NALIST-B with #'equal, otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (let ((res t))
@@ -245,12 +245,12 @@ FUNCTION is called with two arguments, KEY and VALUE.
     res))
 
 (defun nalist-equal (nalist-a nalist-b)
-  "Return t if NALIST-A nad NALIST-B are identical with 'equal, otherwise nil."
+  "Return t if NALIST-A nad NALIST-B are identical with #'equal, otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (equal nalist-a nalist-b))
 
-(defun nalist-set-equal (nalist-a nalist-b &optional testfn)
+(defun nalist-set-equal-p (nalist-a nalist-b &optional testfn)
   "Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
 
 Return t if so, otherwise nil.  The default value of TESTFN is 'equal."
