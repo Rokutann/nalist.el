@@ -138,8 +138,8 @@ in other buffers share the cons cells through it."
     `(let ((,copy ,nalist))
        (setq ,nalist nil)
        (make-variable-buffer-local ',nalist)
-       (setq ,nalist ,copy)))
-  ',nalist)
+       (setq ,nalist ,copy)
+       ',nalist)))
 
 (defmacro nalist-clear (nalist)
   "Set NALIST nil."

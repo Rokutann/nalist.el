@@ -219,6 +219,25 @@
         (should (equal na '((a . b)))))
       (should-not (local-variable-p 'nal)))))
 
+;;; nalist-make-variable-buffer-local
+
+(ert-deftest nalit-make-variable-buffer-local-test/2 ()
+  (cl-macrolet ((test-with-temp-variable
+                 ()
+                 (let ((na (cl-gentemp "na")))
+                   `(with-unbound-symbols (,na)
+                      (with-temp-buffers (buf buf2)
+                        (setq ,na (copy-alist '((a . b))))
+                        (should-not (local-variable-if-set-p ',na))
+                        (with-current-buffer buf
+                          (nalist-make-variable-buffer-local ,na)
+                          (should (local-variable-if-set-p ',na))
+                          (should (seq-set-equal-p ,na '((a . b))))
+                          (setq ,na (copy-alist '((x . y)))))
+                        (with-current-buffer buf2
+                          (should (eq ,na nil))))))))
+    (test-with-temp-variable)))
+
 ;;; nalist-equal
 
 (ert-deftest nalist-equal-test/nil-nil ()
