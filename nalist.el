@@ -122,8 +122,8 @@ cells."
   (let ((copy (gensym)))
     `(let ((,copy (copy-alist ,nalist)))
        (make-local-variable ',nalist)
-       (setq ,nalist ,copy)))
-  ',nalist)
+       (setq ,nalist ,copy)
+       ',nalist)))
 
 (defmacro nalist-make-variable-buffer-local (nalist)
   "Mark NALIST automatically buffer local.

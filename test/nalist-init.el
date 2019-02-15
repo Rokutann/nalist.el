@@ -31,7 +31,17 @@
 (require 'f)
 (require 's)
 
-(load (f-expand "nalist.el" default-directory))
+(defvar nalist-test/test-path
+  (directory-file-name (file-name-directory load-file-name))
+  "Path to tests directory.")
+
+(defvar nalist-test/root-path
+  (directory-file-name (file-name-directory nalist-test/test-path))
+  "Path to root directory.")
+
+(load (expand-file-name "nalist" nalist-test/root-path) 'noerror 'nomessage)
+
+;;(load (f-expand "nalist.el" default-directory))
 
 (provide 'nalist-init)
 ;;; nalist-init.el ends here

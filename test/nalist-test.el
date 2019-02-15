@@ -195,6 +195,30 @@
                         na)))
     (should (seq-set-equal-p (funcall closure) '((x . y) (v . w))))))
 
+(ert-deftest nalist-init-test/buffer-local-hygienic ()
+  (with-unbound-symbols (alist blist na closure)
+    (with-temp-buffers (buf)
+      (setq alist (copy-alist '((a . b) (c . d))))
+      (nalist-init na alist)
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (setq blist (copy-alist '((v . w) (x . y))))
+        (nalist-init na blist))
+      (should (seq-set-equal-p na '((a . b) (c . d)))))))
+
+;;; nalist-make-local-variable
+
+(ert-deftest nalist-make-local-variable-test ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b))))
+      (should-not (local-variable-if-set-p 'na))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (should (local-variable-p 'na))
+        (should (equal na '((a . b)))))
+      (should-not (local-variable-p 'nal)))))
+
 ;;; nalist-equal
 
 (ert-deftest nalist-equal-test/nil-nil ()
@@ -366,6 +390,17 @@
     (should (eq (funcall closure 'v) 'w))
     (should (seq-set-equal-p na '((a . b) (c . d))))))
 
+(ert-deftest nalist-pop-test/buffer-local-hygienic ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b) (c . d))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (setq na (copy-alist '((v . w) (x . y))))
+        (should (eq (nalist-pop 'v na) 'w))
+        (should (seq-set-equal-p na '((x . y)))))
+      (should (seq-set-equal-p na '((a . b) (c . d)))))))
+
 ;;; nalist-poppair
 
 (ert-deftest nalist-poppair-test/not-a-nalist ()
@@ -411,6 +446,17 @@
       (setq closure #'(lambda ()
                         (nalist-poppair na))))
     (should (equal (funcall closure) '(v . w)))))
+
+(ert-deftest nalist-poppair-test/buffer-local-hygienic ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b) (c . d))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (setq na (copy-alist '((v . w) (x . y))))
+        (should (equal (nalist-poppair na) '(v . w)))
+        (should (seq-set-equal-p na '((x . y)))))
+      (should (seq-set-equal-p na '((a . b) (c . d)))))))
 
 ;;; nalist-copy
 
@@ -466,6 +512,20 @@
                         nb)))
     (should (seq-set-equal-p (funcall closure) '((x . y))))
     (should (seq-set-equal-p nb '((1 . 2))))))
+
+(ert-deftest nalist-copy-test/let-scope-hygienic ()
+  (with-unbound-symbols (na nb)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b)))
+            nb (copy-alist '((x . y))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (nalist-make-local-variable nb)
+        (setq na (copy-alist '((1 . 2)))
+              nb nil)
+        (nalist-copy na nb)
+        (should (seq-set-equal-p nb '((1 . 2)))))
+      (should (seq-set-equal-p nb '((x . y)))))))
 
 ;;; nalist-values
 
@@ -702,6 +762,16 @@
     (should (eq (funcall closure) nil))
     (should (seq-set-equal-p na '((a . b))))))
 
+(ert-deftest nalist-clear-test/buffer-local-hygienic ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (nalist-clear na)
+        (should (eq na nil)))
+      (should (seq-set-equal-p na '((a . b)))))))
+
 ;;; naslit-get
 
 (ert-deftest nalist-get-test/nil ()
@@ -745,6 +815,15 @@
       (setq closure #'(lambda (key)
                         (nalist-get key na))))
     (should (eq (funcall closure 'x) 'y))))
+
+(ert-deftest nalist-get-test/buffer-local-hygienic ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (setq na (copy-alist '((x . y))))
+        (should (eq (nalist-get 'x na) 'y))))))
 
 ;;; nalist-set
 
@@ -815,6 +894,16 @@
     (should (seq-set-equal-p (funcall closure 'a 10) '((a . 10) (c . d) (x . y))))
     (should (seq-set-equal-p na '((a . b) (c . d) (e . f))))))
 
+(ert-deftest nalist-set-test/buffer-local-hygienic ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (nalist-set 'a 'c na)
+        (should (seq-set-equal-p na '((a . c)))))
+      (should (seq-set-equal-p na '((a . b)))))))
+
 ;;; nalist-remove
 
 (ert-deftest nalist-remove-test/nil ()
@@ -882,5 +971,15 @@
                         na)))
     (should (seq-set-equal-p (funcall closure 'a) '((c . d) (x . y))))
     (should (seq-set-equal-p na '((a . b) (c . d) (e . f))))))
+
+(ert-deftest nalist-remove-test/buffer-local-hygienic ()
+  (with-unbound-symbols (na)
+    (with-temp-buffers (buf)
+      (setq na (copy-alist '((a . b) (c . d))))
+      (with-current-buffer buf
+        (nalist-make-local-variable na)
+        (nalist-remove 'a na)
+        (should (seq-set-equal-p na '((c . d)))))
+      (should (seq-set-equal-p na '((a . b) (c . d)))))))
 
 ;;; nalist-test.el ends here
