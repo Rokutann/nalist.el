@@ -26,8 +26,10 @@
 
 ;;; Code:
 
+;;; nalist-pairp
+
 (ert-deftest nalist-pairp-test/nil ()
-  (should-not(nalist-pairp nil)))
+  (should-not (nalist-pairp nil)))
 
 (ert-deftest nalist-pairp-test/symbol ()
   (should-not (nalist-pairp 'a)))
@@ -40,6 +42,8 @@
 
 (ert-deftest nalist-pairp-test/list ()
   (should (nalist-pairp '(a b))))
+
+;;; nalist-proper-list-p
 
 (ert-deftest nalist-proper-list-p-test/nil ()
   (should (nalist-proper-list-p nil)))
@@ -104,14 +108,7 @@
 (ert-deftest nalist-proper-list-p-test/circular-just-sharing-5-steps ()
   (should (nalist-proper-list-p '#1=(a b c d #1#))))
 
-(ert-deftest nalist-proper-list-p-test/circular-misc ()
-  (should-not (nalist-proper-list-p '#1=(#2=(#1# . #2#) . #1#)))
-  (should (nalist-proper-list-p '#1=(#2=(#1# . #4=#1#) . #3=(#4# . #2#))))
-  (should (nalist-proper-list-p '(#1=(a) . #1#)))
-  (should (nalist-proper-list-p '#1=(a  #1#)))
-  (should (nalist-proper-list-p '(#1=(a) b #1#)))
-  (should-not (nalist-proper-list-p '#1=(#2=(a) (#2#) . #1#)))
-  (should-not (nalist-proper-list-p '#1=(#2=(#3=(a . #1#) . #2#) . #3#))))
+;;; nalist-nalist-p
 
 (ert-deftest nalist-nalist-p-test/nil ()
   (should (nalist-nalist-p nil)))
@@ -149,6 +146,8 @@
 (ert-deftest nalist-nalist-p-test/broken-alist-3 ()
   (should-not (nalist-nalist-p '((a . b) (c . d) . (e . f)))))
 
+;;; nalist-init
+
 (ert-deftest nalist-init-test/literal ()
   (with-unbound-symbols (na)
     (nalist-init na '((a . b) (c . d)))
@@ -173,6 +172,30 @@
 (ert-deftest nalist-init-test/not-an-alist ()
   (with-unbound-symbols (na)
     (should-error (nalist-init na 'a))))
+
+(ert-deftest nalist-init-test/let-scope-hygienic ()
+  (with-unbound-symbols (alist blist na)
+    (setq alist (copy-alist '((a . b) (c . d))))
+    (setq blist (copy-alist '((x . y) (v . w))))
+    (nalist-init na alist)
+    (should (seq-set-equal-p na '((a . b) (c . d))))
+    (let ((na nil))
+      (nalist-init na blist)
+      (should (seq-set-equal-p na '((x . y) (v . w)))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
+
+(ert-deftest nalist-init-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (alist blist na closure)
+    (setq alist (copy-alist '((a . b) (c . d))))
+    (nalist-init na alist)
+    (let ((na nil)
+          (blist (copy-alist '((x . y) (v . w)))))
+      (setq closure #'(lambda ()
+                        (nalist-init na blist)
+                        na)))
+    (should (seq-set-equal-p (funcall closure) '((x . y) (v . w))))))
+
+;;; nalist-equal
 
 (ert-deftest nalist-equal-test/nil-nil ()
   (should (nalist-equal nil nil)))
@@ -203,6 +226,8 @@
 
 (ert-deftest nalist-equal-test/alist-alist-nil ()
   (should-not (nalist-equal '((a . b) (c . d)) '((c . d) (a . b)))))
+
+;;; nalist-set-equal
 
 (ert-deftest nalist-set-equal-test/nil-nil ()
   (should (nalist-set-equal nil nil)))
@@ -236,6 +261,8 @@
 
 (ert-deftest nalist-set-equal-test/alist-alist-nil ()
   (should (nalist-set-equal '((a . b) (c . d)) '((c . d) (a . b)))))
+
+;;; nalist-map
 
 (ert-deftest nalist-map-test/not-a-nalist ()
   (with-unbound-symbols (na)
@@ -274,6 +301,19 @@
       (nalist-map #'(lambda (k v) (push k res)) na)
       (should (seq-set-equal-p res '(a c e g j l n p r t v x z 1 3 5))))))
 
+(ert-deftest nalist-map-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((res nil))
+      (nalist-map #'(lambda (k v) (push k res)) na)
+      (should (seq-set-equal-p res '(a)))
+      (let ((na (copy-alist '((v . w))))
+            (res nil))
+        (nalist-map #'(lambda (k v) (push k res)) na)
+        (should (seq-set-equal-p res '(v)))))))
+
+;;; nalist-pop
+
 (ert-deftest nalist-pop-test/nil ()
   (with-unbound-symbols (na)
     (setq na nil)
@@ -309,6 +349,25 @@
                                   (r . s) (t . u) (v . w) (x . y)
                                   (z . 0) (1 . 2) (3 . 4) (5 . 6))))))
 
+(ert-deftest nalist-pop-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (let ((na (copy-alist '((v . w) (x . y)))))
+      (should (eq (nalist-pop 'v na) 'w))
+      (should (seq-set-equal-p na '((x . y)))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
+
+(ert-deftest nalist-pop-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na closure)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (let ((na (copy-alist '((v . w) (x . y)))))
+      (setq closure #'(lambda (key)
+                        (nalist-pop key na))))
+    (should (eq (funcall closure 'v) 'w))
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
+
+;;; nalist-poppair
+
 (ert-deftest nalist-poppair-test/not-a-nalist ()
   (with-unbound-symbols (na)
     (setq na '(a b c))
@@ -336,6 +395,24 @@
                                   (j . k) (l . m) (n . o) (p . q)
                                   (r . s) (t . u) (v . w) (x . y)
                                   (z . 0) (1 . 2) (3 . 4) (5 . 6))))))
+
+(ert-deftest nalist-poppair-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (let ((na (copy-alist '((v . w) (x . y)))))
+      (should (equal (nalist-poppair na) '(v . w)))
+      (should (seq-set-equal-p na '((x . y)))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
+
+(ert-deftest nalist-poppair-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na closure)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (let ((na (copy-alist '((v . w) (x . y)))))
+      (setq closure #'(lambda ()
+                        (nalist-poppair na))))
+    (should (equal (funcall closure) '(v . w)))))
+
+;;; nalist-copy
 
 (ert-deftest nalist-copy-test/not-a-nalsit ()
   (with-unbound-symbols (na nb)
@@ -368,6 +445,30 @@
     (should (seq-set-equal-p nb '((a . b))))
     (should (eq na nb))))
 
+(ert-deftest nalist-copy-test/let-scope-hygienic ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b)))
+          nb (copy-alist '((x . y))))
+    (let ((na (copy-alist '((1 . 2))))
+          (nb nil))
+      (nalist-copy na nb)
+      (should (seq-set-equal-p nb '((1 . 2)))))
+    (should (seq-set-equal-p nb '((x . y))))))
+
+(ert-deftest nalist-copy-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na nb closure)
+    (setq na (copy-alist '((a . b)))
+          nb (copy-alist '((1 . 2))))
+    (let ((na (copy-alist '((x . y))))
+          (nb nil))
+      (setq closure #'(lambda ()
+                        (nalist-copy na nb)
+                        nb)))
+    (should (seq-set-equal-p (funcall closure) '((x . y))))
+    (should (seq-set-equal-p nb '((1 . 2))))))
+
+;;; nalist-values
+
 (ert-deftest nalist-values-test/not-a-nalist ()
   (with-unbound-symbols (na)
     (setq na '(a b))
@@ -396,6 +497,14 @@
                            (z . 0) (1 . 2) (3 . 4) (5 . 6))))
     (should (seq-set-equal-p (nalist-values na)
                              '(b d f h k m o q s u w y 0 2 4 6)))))
+
+(ert-deftest nalist-values-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((a . c)))))
+      (should (seq-set-equal-p (nalist-values na) '(c))))))
+
+;;; nalist-pairs
 
 (ert-deftest nalist-pairs-test/not-a-nalist ()
   (with-unbound-symbols (na)
@@ -428,6 +537,15 @@
     (should (seq-set-equal-p (nalist-pairs na) na))
     (should-not (eq (nalist-pairs na) na ))))
 
+(ert-deftest nalist-pairs-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((x . y)))))
+      (should (seq-set-equal-p (nalist-pairs na) '((x . y))))
+      )))
+
+;;; nalist-keys
+
 (ert-deftest nalist-keys-test/not-a-nalist ()
   (with-unbound-symbols (na)
     (setq na '(a b))
@@ -457,56 +575,312 @@
     (should (seq-set-equal-p (nalist-keys na)
                              '(a c e g j l n p r t v x z 1 3 5)))))
 
-(ert-deftest nalist-subset-p-test ()
-  (should (nalist-subset-p '((a . 1)) '((b . 2) (a . 1)))))
+(ert-deftest nalist-keys-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((x . y)))))
+      (should (seq-set-equal-p (nalist-keys na) '(x))))))
 
-(ert-deftest nalist-equal-test ()
-  (should (nalist-set-equal '((a . 1) (b . 2)) '((b . 2) (a . 1)))))
+;;; nalist-subset-p
+
+(ert-deftest nalist-subset-p-test/nalist-a-is-not-a-nalist ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '(a b)))
+    (setq nb (copy-alist '((a . b))))
+    (should-assertion-error (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/nalist-b-is-not-a-nalist ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb (copy-alist '(a b)))
+    (should-assertion-error (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/nil-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na nil)
+    (setq nb nil)
+    (should (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/nil-one ()
+  (with-unbound-symbols (na nb)
+    (setq na nil)
+    (setq nb (copy-alist '((a . b))))
+    (should (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/one-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb nil)
+    (should-not (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/one-one-t ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb (copy-alist '((a . b))))
+    (should (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/one-one-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb (copy-alist '((a . x))))
+    (should-not (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/one-two-t ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb (copy-alist '((a . b) (c . d))))
+    (should (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/one-two-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb (copy-alist '((a . x) (c . d))))
+    (should-not (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/two-one ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist'((a . b) (c . d))))
+    (setq nb (copy-alist '((a . b))))
+    (should-not (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/many-many-t ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((c . d) (l . m) (e . f) (3 . 4)
+                           (j . k) (v . w) (5 . 6) (p . q)
+                           (r . s) (a . b) (x . y) (g . h)
+                           (z . 0) (n . o) (1 . 2) )))
+    (setq nb (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (should (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/many-many-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((c . d) (l . m) (e . f) (3 . 4)
+                           (j . k) (v . w) (5 . 6) (p . q)
+                           (r . s) (a . b) (x . y) (g . h)
+                           (z . 0) (n . o) (1 . 100) )))
+    (setq nb (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (should-not (nalist-subset-p na nb))))
+
+(ert-deftest nalist-subset-p-test/let-scope-hygienic ()
+  (with-unbound-symbols (na nb)
+    (setq na (copy-alist '((a . b))))
+    (setq nb (copy-alist '((a . b) (c . d))))
+    (let ((na (copy-alist '((x . y)))))
+      (should-not (nalist-subset-p na nb)))
+    (let ((nb (copy-alist '((c . d)))))
+      (should-not (nalist-subset-p na nb)))))
+
+;;; nalist-clear
 
 (ert-deftest nalist-clear-test ()
-  (with-nalist-fixture
-   (nalist-clear nal)
-   (should (eq nal nil))))
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (nalist-clear na)
+    (should (eq na nil))))
 
-(ert-deftest nalist-get-test ()
-  (with-nalist-fixture
-   (should (eq (nalist-get 'a nal) 'b))
-   (should (eq (nalist-get 'b nal) nil))
-   (should (eq (nalist-get 'c nal) 'd))
-   (should (eq (nalist-get 'a nal :testfn 'eq) 'b))
-   (should (eq (nalist-get 'b nal :testfn 'eq) nil))
-   (should (eq (nalist-get 1 nal-eql) 'a))
-   (should (eq (nalist-get 1 nal-eql :testfn 'eql) 'a))
-   (should (eq (nalist-get 1.0 nal-eql) nil))
-   (should (eq (nalist-get 1.0 nal-eql :testfn 'eql) 'b))
-   (should (eq (nalist-get "foo" nal-equal :testfn 'equal) 3))
-   (should (eq (nalist-get '(a (b c)) nal-equal :testfn 'equal) 'd))
-   (should (eq (nalist-get "Hi" nal-equal :testfn #'(lambda (x y) (= (length x) (length y)))) 'd))
-   (should (eq (nalist-get 'a nal :default 'no-value) 'b))
-   (should (eq (nalist-get 'f nal :default 'no-value) 'no-value))))
+(ert-deftest nalist-clear-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((c . d)))))
+      (nalist-clear na)
+      (should (eq na nil)))
+    (should (seq-set-equal-p na '((a . b))))))
 
-(ert-deftest nalist-set-test ()
-  (with-nalist-fixture
-   (nalist-set 'e 'f nal)
-   (should (nalist-set-equal nal '((a . b) (c . d) (e . f))))
-   (nalist-set 'c 'g nal)
-   (should (nalist-set-equal nal '((a . b) (c . g) (e . f))))))
+(ert-deftest nalist-clear-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na closure)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((x . y)))))
+      (setq closure #'(lambda ()
+                        (nalist-clear na)
+                        na)))
+    (should (eq (funcall closure) nil))
+    (should (seq-set-equal-p na '((a . b))))))
 
-(ert-deftest lexical-binding-test ()
-  (setq closure nil)
-  (nalist-init nal '((v . w) (x . y)))
-  (let ((nal nil))
-    (nalist-init nal '((a . b) (c . d)))
-    (setq closure #'(lambda (key value)
-                      (nalist-set key value nal)
-                      nal)))
-  (should (nalist-set-equal nal '((v . w) (x . y))))
-  (should (nalist-set-equal (funcall closure 'a 'e) '((a . e) (c . d))))
-  (should (nalist-set-equal nal '((v . w) (x . y)))))
+;;; naslit-get
 
-(ert-deftest nalist-remove-test ()
-  (with-nalist-fixture
-   (nalist-remove 'a nal)
-   (should (nalist-set-equal nal '((c . d))))))
+(ert-deftest nalist-get-test/nil ()
+  (with-unbound-symbols (na)
+    (setq na nil)
+    (should (eq (nalist-get 'a na) nil))))
+
+(ert-deftest nalist-get-test/one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (should (eq (nalist-get 'a na) 'b))))
+
+(ert-deftest nalist-get-test/two ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (should (eq (nalist-get 'c na) 'd))))
+
+(ert-deftest nalist-get-test/many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (should (eq (nalist-get 'z na) 0))))
+
+(ert-deftest nalist-get-test/testfn ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '(("a" . b))))
+    (should (eq (nalist-get "a" na :testfn 'equal) 'b))))
+
+(ert-deftest nalist-get-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((x . y)))))
+      (should (eq (nalist-get 'x na) 'y)))))
+
+(ert-deftest nalist-get-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na closure)
+    (setq na (copy-alist '((a . b) (c . d) (e . f))))
+    (let ((na (copy-alist '((a . b) (c . d) (x . y)))))
+      (setq closure #'(lambda (key)
+                        (nalist-get key na))))
+    (should (eq (funcall closure 'x) 'y))))
+
+;;; nalist-set
+
+(ert-deftest nalist-set-test/nil ()
+  (with-unbound-symbols (na)
+    (setq na nil)
+    (nalist-set 'a 'b na)
+    (should (seq-set-equal-p na '((a . b))))))
+
+(ert-deftest nalist-set-test/non-existent-key-one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (nalist-set 'c 'd na)
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
+
+(ert-deftest nalist-set-test/non-existent-key-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (nalist-set 100 'a na)
+    (should (seq-set-equal-p na '((a . b) (c . d) (e . f) (g . h)
+                                  (j . k) (l . m) (n . o) (p . q)
+                                  (r . s) (t . u) (v . w) (x . y)
+                                  (z . 0) (1 . 2) (3 . 4) (5 . 6)
+                                  (100 . a))))))
+
+(ert-deftest nalist-set-test/existent-key-one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (nalist-set 'a 'c na)
+    (should (seq-set-equal-p na '((a . c))))))
+
+(ert-deftest nalist-set-test/existent-key-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (nalist-set 3 100 na)
+    (should (seq-set-equal-p na '((a . b) (c . d) (e . f) (g . h)
+                                  (j . k) (l . m) (n . o) (p . q)
+                                  (r . s) (t . u) (v . w) (x . y)
+                                  (z . 0) (1 . 2) (3 . 100) (5 . 6))))))
+
+(ert-deftest nalist-set-test/testfn ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '(("a" . b) ("c" . d))))
+    (nalist-set "a" 'c na :testfn 'equal)
+    (should (seq-set-equal-p na '(("a" . c) ("c" . d))))))
+
+(ert-deftest nalist-set-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (let ((na (copy-alist '((a . b)))))
+      (nalist-set 'a 'c na)
+      (should (seq-set-equal-p na '((a . c)))))
+    (should (seq-set-equal-p na '((a . b))))))
+
+(ert-deftest nalist-set-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na closure)
+    (setq na (copy-alist '((a . b) (c . d) (e . f))))
+    (let ((na (copy-alist '((a . b) (c . d) (x . y)))))
+      (setq closure #'(lambda (key value)
+                        (nalist-set key value na)
+                        na)))
+    (should (seq-set-equal-p (funcall closure 'a 10) '((a . 10) (c . d) (x . y))))
+    (should (seq-set-equal-p na '((a . b) (c . d) (e . f))))))
+
+;;; nalist-remove
+
+(ert-deftest nalist-remove-test/nil ()
+  (with-unbound-symbols (na)
+    (setq na nil)
+    (nalist-remove 'a na)
+    (should (eq na nil))))
+
+(ert-deftest nalist-remove-test/non-existent-key-one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (nalist-remove 'c na)
+    (should (seq-set-equal-p na '((a . b))))))
+
+(ert-deftest nalist-remove-test/non-existent-key-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (nalist-remove 100 na)
+    (should (seq-set-equal-p na '((a . b) (c . d) (e . f) (g . h)
+                                  (j . k) (l . m) (n . o) (p . q)
+                                  (r . s) (t . u) (v . w) (x . y)
+                                  (z . 0) (1 . 2) (3 . 4) (5 . 6))))))
+
+(ert-deftest nalist-remove-test/existent-key-one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (nalist-remove 'a na)
+    (should (eq na nil))))
+
+(ert-deftest nalist-remove-test/existent-key-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (nalist-remove 3 na)
+    (should (seq-set-equal-p na '((a . b) (c . d) (e . f) (g . h)
+                                  (j . k) (l . m) (n . o) (p . q)
+                                  (r . s) (t . u) (v . w) (x . y)
+                                  (z . 0) (1 . 2)         (5 . 6))))))
+
+(ert-deftest nalist-remove-test/testfn ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '(("a" . b) ("c" . d))))
+    (nalist-remove "a" na :testfn 'equal)
+    (should (seq-set-equal-p na '(("c" . d))))))
+
+(ert-deftest nalist-remove-test/let-scope-hygienic ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (let ((na (copy-alist '((a . b) (c . d)))))
+      (nalist-remove 'a na)
+      (should (seq-set-equal-p na '((c . d)))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
+
+(ert-deftest nalist-remove-test/lexical-binding-hygienic ()
+  (with-unbound-symbols (na closure)
+    (setq na (copy-alist '((a . b) (c . d) (e . f))))
+    (let ((na (copy-alist '((a . b) (c . d) (x . y)))))
+      (setq closure #'(lambda (key)
+                        (nalist-remove key na)
+                        na)))
+    (should (seq-set-equal-p (funcall closure 'a) '((c . d) (x . y))))
+    (should (seq-set-equal-p na '((a . b) (c . d) (e . f))))))
 
 ;;; nalist-test.el ends here

@@ -145,21 +145,21 @@ in other buffers share the cons cells through it."
   "Set NALIST nil."
   `(setq ,nalist nil))
 
-(cl-defmacro nalist-set (key value nalist &key (testfn 'eq))
+(cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
   "Find a pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
 It destructively changes the value of KEY into VALUE if a pair
 with KEY already exists in NALIST, otherwise creates a new pair
 with KEY and VALUE."
-  `(setf (alist-get ,key ,nalist nil nil ',testfn) ,value))
+  `(setf (alist-get ,key ,nalist nil nil ,testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
   "Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT."
   (alist-get key nalist default nil testfn))
 
-(cl-defmacro nalist-remove (key nalist &key (testfn 'eq))
+(cl-defmacro nalist-remove (key nalist &key (testfn ''eq))
   "Remove the pair with KEY from NALIST if found TESTFN-wise."
-  `(setf (alist-get ,key ,nalist nil t ',testfn) nil))
+  `(setf (alist-get ,key ,nalist nil t ,testfn) nil))
 
 (defun nalist-pairs (nalist)
   "Return a list consisting all the pairs in NALIST."
@@ -232,6 +232,8 @@ FUNCTION is called with two arguments, KEY and VALUE.
 
 (defun nalist-subset-p (nalist-a nalist-b)
   "Return t if NALIST-A is a subset of NALIST-B `equal'-wise, otherwise nil."
+  (cl-assert (nalist-nalist-p nalist-a) t)
+  (cl-assert (nalist-nalist-p nalist-b) t)
   (let ((res t))
     (mapc #'(lambda (pair)
               (unless (member pair nalist-b)
