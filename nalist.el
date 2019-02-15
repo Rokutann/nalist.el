@@ -53,16 +53,16 @@ A proper list is a non circular cons chain whose last `cdr' points nil."
          for 2nth-cdr = (cdr obj) then (cddr 2nth-cdr)
          when (eq nth-cdr 2nth-cdr) return nil
          ;; A circular list consists of finite positions: When we move
-         ;; a pointer along its structure using `cdr', it goes back to
-         ;; the same reference point in finite steps.  It's periodic.
-         ;; Let's assume the period is N steps.  If we move two
-         ;; pointers so that one moves one step at a time starting
-         ;; from the position 1, the other moves two steps at a time
-         ;; starting from the position 2, the former points the nth
-         ;; position, the latter points the 2nth position after n
-         ;; iterations.  So, after N iterations, the former and the
-         ;; latter point the same position on the circular list
-         ;; because it's N-periodic.
+         ;; a pointer along its cons cell chain using `cdr', it goes
+         ;; back to the same reference point in finite steps.
+         ;; Moreover, it's periodic.  Let's assume the period is N
+         ;; steps.  If we move two pointers so that one moves one step
+         ;; at a time starting from the position 1, the other moves
+         ;; two steps at a time starting from the position 2, the
+         ;; former points the nth position, the latter points the 2nth
+         ;; position after n iterations.  So, after N iterations, the
+         ;; former and the latter point the same position on the
+         ;; circular list because it's N-periodic.
          ;;
          when (null nth-cdr) return t
          ;; nth-cdr and 2nth-cdr advance different steps at a
@@ -90,7 +90,7 @@ A proper list is a non circular cons chain whose last `cdr' points nil."
         )))
 
 (defun nalist-nalist-p (obj)
-  "Return t if OBJ is an alist, otherwise nil.
+  "Return t if OBJ is an (n)alist, otherwise nil.
 
 An alist, or association list, is a proper list of pairs.  What
 `car' and `cdr' of a pair in alist point is often called a key
@@ -132,8 +132,9 @@ This macro binds a deep-copy of the content of the original
 NALIST to the buffer-local NALIST to avoid their sharing cons
 cells.
 
-It also sets the default value of NALIST nil to avoid variables
-in other buffers share the cons cells through it."
+It also sets the default value of NALIST to nil to avoid the
+buffer-local variables in other buffers share the cons cells
+through it."
   (let ((copy (gensym)))
     `(let ((,copy ,nalist))
        (setq ,nalist nil)
@@ -146,19 +147,21 @@ in other buffers share the cons cells through it."
   `(setq ,nalist nil))
 
 (cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
-  "Find a pair with KEY in NALIST with TESTFN, and set its value to VALUE.
+  "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-It destructively changes the value of KEY into VALUE if a pair
-with KEY already exists in NALIST, otherwise creates a new pair
-with KEY and VALUE."
+It destructively changes the value of the pair with KEY into
+VALUE if the pair with KEY already exists, otherwise add a
+new pair with KEY and VALUE to NALIST."
   `(setf (alist-get ,key ,nalist nil nil ,testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
-  "Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT."
+  "Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
+
+The default value of TESTFN is 'eq."
   (alist-get key nalist default nil testfn))
 
 (cl-defmacro nalist-remove (key nalist &key (testfn ''eq))
-  "Remove the pair with KEY from NALIST if found TESTFN-wise."
+  "Remove the pair with KEY from NALIST if found with TESTFN."
   `(setf (alist-get ,key ,nalist nil t ,testfn) nil))
 
 (defun nalist-pairs (nalist)
@@ -231,7 +234,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a subset of NALIST-B `equal'-wise, otherwise nil."
+  "Return t if NALIST-A is a subset of NALIST-B with 'equal, otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (let ((res t))
@@ -242,7 +245,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     res))
 
 (defun nalist-equal (nalist-a nalist-b)
-  "Return t if NALIST-A nad NALIST-B are identical `equal'-wise, otherwise nil."
+  "Return t if NALIST-A nad NALIST-B are identical with 'equal, otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (equal nalist-a nalist-b))
@@ -250,7 +253,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
 (defun nalist-set-equal (nalist-a nalist-b &optional testfn)
   "Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
 
-Return t if so, otherwise nil.  The default TESTFN is `equal'."
+Return t if so, otherwise nil.  The default value of TESTFN is 'equal."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (seq-set-equal-p nalist-a nalist-b testfn))

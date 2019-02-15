@@ -181,3 +181,21 @@ your Emacs config:
 (nalist-set-equal nal-1 '((a . b) (c . d)))) ;; => t
 (nalist-set-equal nal-1 '((c . d) (a . b)))) ;; => t
 ```
+
+### nalist-make-local-variable `(nalist)`
+
+{{nalist-make-local-variable}}
+
+```lisp
+(nalist-make-local-variable na-1)
+;; na-1 is changed to a buffer-local variable in the current buffer.
+```
+
+### nalist-make-variable-buffer-local `(nalist)`
+
+{{nalist-make-variable-buffer-local}}
+
+```lisp
+(nalist-make-variable-buffer-local na-2)
+;; na-2 is changed to an automatically buffer-local variable.
+```

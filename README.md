@@ -28,7 +28,9 @@ Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
 ### nalist-get `(key nalist &key default (testfn 'eq))`
 
-Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT.
+Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
+
+The default value of TESTFN is ’eq.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
 
@@ -41,13 +43,13 @@ Return the value of KEY in NALIST if found TESTFN-wise, otherwise DEFAULT.
 
 ### nalist-set `(key value nalist &key (testfn 'eq))`
 
-Find a pair with KEY in NALIST with TESTFN, and set its value to VALUE.
+Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-It destructively changes the value of KEY into VALUE if a pair
-with KEY already exists in NALIST, otherwise creates a new pair
-with KEY and VALUE.
+It destructively changes the value of the pair with KEY into
+VALUE if the pair with KEY already exists, otherwise add a
+new pair with KEY and VALUE to NALIST.
 
-(fn KEY VALUE NALIST &key (TESTFN 'eq))
+(fn KEY VALUE NALIST &key (TESTFN ''eq))
 
 ```lisp
 (nalist-set 'c 'g nal-1) ;; => 'g
@@ -56,9 +58,9 @@ with KEY and VALUE.
 
 ### nalist-remove `(key nalist &key (testfn 'eq))`
 
-Remove the pair with KEY from NALIST if found TESTFN-wise.
+Remove the pair with KEY from NALIST if found with TESTFN.
 
-(fn KEY NALIST &key (TESTFN 'eq))
+(fn KEY NALIST &key (TESTFN ''eq))
 
 ```lisp
 (nalist-remove 'c nal-1) ;; => nil
@@ -171,7 +173,7 @@ A proper list is a non circular cons chain whose last ‘cdr’ points nil.
 
 ### nalist-nalist-p `(obj)`
 
-Return t if OBJ is an alist, otherwise nil.
+Return t if OBJ is an (n)alist, otherwise nil.
 
 An alist, or association list, is a proper list of pairs.  What
 ‘car’ and ‘cdr’ of a pair in alist point is often called a key
@@ -186,7 +188,7 @@ and value respectively.
 
 ### nalist-subset-p `(nalist-a nalist-b)`
 
-Return t if NALIST-A is a subset of NALIST-B ‘equal’-wise, otherwise nil.
+Return t if NALIST-A is a subset of NALIST-B with ’equal, otherwise nil.
 
 ```lisp
 (nalist-subset-p '((a . b)) '((a . b) (c . d))) ;; => t
@@ -195,7 +197,7 @@ Return t if NALIST-A is a subset of NALIST-B ‘equal’-wise, otherwise nil.
 
 ### nalist-equal `(nalist-a nalist-b)`
 
-Return t if NALIST-A nad NALIST-B are identical ‘equal’-wise, otherwise nil.
+Return t if NALIST-A nad NALIST-B are identical with ’equal, otherwise nil.
 
 ```lisp
 (nalist-equal nal-1 '((a . b) (c . d)))) ;; => t
@@ -206,9 +208,39 @@ Return t if NALIST-A nad NALIST-B are identical ‘equal’-wise, otherwise nil.
 
 Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
 
-Return t if so, otherwise nil.  The default TESTFN is ‘equal’.
+Return t if so, otherwise nil.  The default value of TESTFN is ’equal.
 
 ```lisp
 (nalist-set-equal nal-1 '((a . b) (c . d)))) ;; => t
 (nalist-set-equal nal-1 '((c . d) (a . b)))) ;; => t
+```
+
+### nalist-make-local-variable `(nalist)`
+
+Create a buffer-local binding in the current buffer for NALIST.
+
+This macro binds a deep-copy of the content of the original
+NALIST to the buffer-local NALIST to avoid their sharing cons
+cells.
+
+```lisp
+(nalist-make-local-variable na-1)
+;; na-1 is changed to a buffer-local variable in the current buffer.
+```
+
+### nalist-make-variable-buffer-local `(nalist)`
+
+Mark NALIST automatically buffer local.
+
+This macro binds a deep-copy of the content of the original
+NALIST to the buffer-local NALIST to avoid their sharing cons
+cells.
+
+It also sets the default value of NALIST to nil to avoid the
+buffer-local variables in other buffers share the cons cells
+through it.
+
+```lisp
+(nalist-make-variable-buffer-local na-2)
+;; na-2 is changed to an automatically buffer-local variable.
 ```
