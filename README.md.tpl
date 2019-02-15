@@ -53,7 +53,7 @@ your Emacs config:
 ;; The content of nal-1 is changed to '((a . b))
 ```
 
-### nalist-pop `(key nalist)`
+### nalist-pop `(key nalist &key (testfn 'eq)`
 
 {{nalist-pop}}
 
@@ -173,9 +173,9 @@ your Emacs config:
 (nalist-equal nal-1 '((c . d) (a . b)))) ;; => nil
 ```
 
-### nalist-set-equal `(nalist-a nalist-b &optional testfn)`
+### nalist-set-equal-p `(nalist-a nalist-b &key (testfn 'equal)`
 
-{{nalist-set-equal}}
+{{nalist-set-equal-p}}
 
 ```lisp
 (nalist-set-equal nal-1 '((a . b) (c . d)))) ;; => t

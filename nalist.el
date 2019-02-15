@@ -171,6 +171,7 @@ The default value of TESTFN is 'eq."
 
 (defun nalist-keys (nalist)
   "Return a list consisting all the keys in NALIST."
+  (cl-assert (nalist-nalist-p nalist) t)
   (mapcar 'car nalist))
 
 (defun nalist-values (nalist)
@@ -190,8 +191,11 @@ uses deep-copy."
        (setq ,nalist-new (copy-alist ,nalist-old)))
      ',nalist-new))
 
-(defmacro nalist-pop (key nalist)
-  "Remove the pair with KEY from NALIST, and return the value of the pair."
+(cl-defmacro nalist-pop (key nalist &key (testfn ''eq))
+  "Remove the pair with KEY from NALIST, and return the value of the pair.
+
+This macro uses TESTFN to find the pair with the KEY. The default
+value of TESTFN is `eq'."
   (let ((before (gensym))
         (after (gensym))
         (pair (gensym))
@@ -207,7 +211,7 @@ uses deep-copy."
              ((null ,after)
               (setq ,nalist ,before)
               (cdr ,pair-found))
-           (if (eq (car ,pair) ,key)
+           (if (funcall ,testfn (car ,pair) ,key)
                (setq ,pair-found ,pair)
              (push ,pair ,before)))))))
 
@@ -234,7 +238,7 @@ FUNCTION is called with two arguments, KEY and VALUE.
     nil))
 
 (defun nalist-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a subset of NALIST-B with #'equal, otherwise nil."
+  "Return t if NALIST-A is a subset of NALIST-B with `equal', otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (let ((res t))
@@ -245,18 +249,18 @@ FUNCTION is called with two arguments, KEY and VALUE.
     res))
 
 (defun nalist-equal (nalist-a nalist-b)
-  "Return t if NALIST-A nad NALIST-B are identical with #'equal, otherwise nil."
+  "Return t if NALIST-A nad NALIST-B are identical with `equal', otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
   (equal nalist-a nalist-b))
 
-(defun nalist-set-equal-p (nalist-a nalist-b &optional testfn)
-  "Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
+(defun nalist-set-equal-p (nalist-a nalist-b)
+  "Test with `equal' if NALIST-A and NALIST-B have the same set of pairs.
 
-Return t if so, otherwise nil.  The default value of TESTFN is 'equal."
+Return t if so, otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
-  (seq-set-equal-p nalist-a nalist-b testfn))
+  (seq-set-equal-p nalist-a nalist-b))
 
 
 (provide 'nalist)

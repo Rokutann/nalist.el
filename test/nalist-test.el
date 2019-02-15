@@ -300,10 +300,10 @@
   (should-not (nalist-set-equal-p '((a . b) (c . d)) '((a . b) (c . x)))))
 
 (ert-deftest nalist-set-equal-p-test/alist-alist-t ()
-  (should (nalist-set-equal-p '((a . b) (c . d)) '((a . b) (c . d)))))
-
-(ert-deftest nalist-set-equal-p-test/alist-alist-nil ()
   (should (nalist-set-equal-p '((a . b) (c . d)) '((c . d) (a . b)))))
+
+(ert-deftest nalist-set-equal-p-test/alists-with-strings ()
+  (should (nalist-set-equal-p '((a . b) (c . "d")) '((c . "d") (a . b)))))
 
 ;;; nalist-map
 
@@ -391,6 +391,12 @@
                                   (j . k) (l . m) (n . o) (p . q)
                                   (r . s) (t . u) (v . w) (x . y)
                                   (z . 0) (1 . 2) (3 . 4) (5 . 6))))))
+
+(ert-deftest nalist-pop-test/testfn ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) ("c" . d))))
+    (should (eq (nalist-pop "c" na :testfn 'equal) 'd))
+    (should (seq-set-equal-p na '((a . b))))))
 
 (ert-deftest nalist-pop-test/let-scope-hygienic ()
   (with-unbound-symbols (na)

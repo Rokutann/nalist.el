@@ -67,9 +67,14 @@ Remove the pair with KEY from NALIST if found with TESTFN.
 ;; The content of nal-1 is changed to '((a . b))
 ```
 
-### nalist-pop `(key nalist)`
+### nalist-pop `(key nalist &key (testfn 'eq)`
 
 Remove the pair with KEY from NALIST, and return the value of the pair.
+
+This macro uses TESTFN to find the pair with the KEY. The default
+value of TESTFN is ‘eq’.
+
+(fn KEY NALIST &key (TESTFN ''eq))
 
 ```lisp
 (nalist-pop 'c nal-1) ;; => 'd
@@ -148,8 +153,8 @@ FUNCTION is called with two arguments, KEY and VALUE.
 
 Return t if OBJ is a pair, otherwise nil.
 
-A pair is a cons cell, regardless of what Lisp objects its ‘car’
-and ‘cdr’ point.
+A pair is a cons cell, regardless of what Lisp objects its car
+and cdr point.
 
 ```lisp
 (nalist-pairp 'a) ;; => nil
@@ -188,7 +193,7 @@ and value respectively.
 
 ### nalist-subset-p `(nalist-a nalist-b)`
 
-Return t if NALIST-A is a subset of NALIST-B with ’equal, otherwise nil.
+Return t if NALIST-A is a subset of NALIST-B with ‘equal’, otherwise nil.
 
 ```lisp
 (nalist-subset-p '((a . b)) '((a . b) (c . d))) ;; => t
@@ -197,18 +202,18 @@ Return t if NALIST-A is a subset of NALIST-B with ’equal, otherwise nil.
 
 ### nalist-equal `(nalist-a nalist-b)`
 
-Return t if NALIST-A nad NALIST-B are identical with ’equal, otherwise nil.
+Return t if NALIST-A nad NALIST-B are identical with ‘equal’, otherwise nil.
 
 ```lisp
 (nalist-equal nal-1 '((a . b) (c . d)))) ;; => t
 (nalist-equal nal-1 '((c . d) (a . b)))) ;; => nil
 ```
 
-### nalist-set-equal `(nalist-a nalist-b &optional testfn)`
+### nalist-set-equal-p `(nalist-a nalist-b &key (testfn 'equal)`
 
-Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
+Test with ‘equal’ if NALIST-A and NALIST-B have the same set of pairs.
 
-Return t if so, otherwise nil.  The default value of TESTFN is ’equal.
+Return t if so, otherwise nil.
 
 ```lisp
 (nalist-set-equal nal-1 '((a . b) (c . d)))) ;; => t
