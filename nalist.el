@@ -163,6 +163,7 @@ with KEY and VALUE."
 
 (defun nalist-pairs (nalist)
   "Return a list consisting all the pairs in NALIST."
+  (cl-assert (nalist-nalist-p nalist) t)
   (copy-alist nalist))
 
 (defun nalist-keys (nalist)
@@ -171,6 +172,7 @@ with KEY and VALUE."
 
 (defun nalist-values (nalist)
   "Return a list consisting all the values in NALIST."
+  (cl-assert (nalist-nalist-p nalist) t)
   (mapcar 'cdr nalist))
 
 (cl-defmacro nalist-copy (nalist-old nalist-new &key shallow)
@@ -208,9 +210,12 @@ uses deep-copy."
 
 (defmacro nalist-poppair (nalist)
   "Return a pair in NALIST, and remove it from NALIST."
-  `(prog1
-       (car ,nalist)
-     (setq ,nalist (cdr ,nalist))))
+  (let ((pair (gensym)))
+    `(progn
+       (cl-assert (nalist-nalist-p ,nalist))
+       (let ((,pair (car ,nalist)))
+         (setq ,nalist (cdr ,nalist))
+         ,pair))))
 
 (defun nalist-map (function nalist)
   "Call FUNCTION for all pairs in NALIST.
