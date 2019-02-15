@@ -26,7 +26,7 @@
 
 ;;; Code:
 
-(defmacro should-assert-error (&rest body)
+(defmacro should-assertion-error (&rest body)
   "Make `cl-assert' raise an error while executing BODY."
   `(let ((debug-on-error nil))
      (should-error

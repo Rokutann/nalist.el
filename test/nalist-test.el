@@ -152,23 +152,23 @@
 (ert-deftest nalist-init-test/literal ()
   (with-unbound-symbols (na)
     (nalist-init na '((a . b) (c . d)))
-    (should (nalist-set-equal na '((a . b) (c . d))))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))))
 
 (ert-deftest nalist-init-test/variable-deep ()
   (with-unbound-symbols (alist na)
     (setq alist (copy-alist '((a . b) (c . d))))
     (nalist-init na alist)
-    (should (nalist-set-equal na '((a . b) (c . d))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))
     (setcar na '(x . y))
-    (should (nalist-set-equal alist '((a . b) (c . d))))))
+    (should (seq-set-equal-p alist '((a . b) (c . d))))))
 
 (ert-deftest nalist-init-test/variable-shallow ()
   (with-unbound-symbols (alist na)
     (setq alist (copy-alist '((a . b) (c . d))))
     (nalist-init na alist :shallow t)
-    (should (nalist-set-equal na '((a . b) (c . d))))
+    (should (seq-set-equal-p na '((a . b) (c . d))))
     (setcar na '(x . y))
-    (should (nalist-set-equal alist '((x . y) (c . d))))))
+    (should (seq-set-equal-p alist '((x . y) (c . d))))))
 
 (ert-deftest nalist-init-test/not-an-alist ()
   (with-unbound-symbols (na)
@@ -178,25 +178,25 @@
   (should (nalist-equal nil nil)))
 
 (ert-deftest nalist-equal-test/nil-atom ()
-  (should-assert-error (nalist-equal nil "foo")))
+  (should-assertion-error (nalist-equal nil "foo")))
 
 (ert-deftest nalist-equal-test/atom-nil ()
-  (should-assert-error (nalist-equal "foo" nil)))
+  (should-assertion-error (nalist-equal "foo" nil)))
 
 (ert-deftest nalist-equal-test/nil-symbol ()
-  (should-assert-error (nalist-equal nil 'foo)))
+  (should-assertion-error (nalist-equal nil 'foo)))
 
 (ert-deftest nalist-equal-test/symbol-nil ()
-  (should-assert-error (nalist-equal 'foo nil)))
+  (should-assertion-error (nalist-equal 'foo nil)))
 
 (ert-deftest nalist-equal-test/cons-nil ()
-  (should-assert-error (nalist-equal '(a . b) nil)))
+  (should-assertion-error (nalist-equal '(a . b) nil)))
 
 (ert-deftest nalist-equal-test/nil-cons ()
-  (should-assert-error (nalist-equal nil '(a . b))))
+  (should-assertion-error (nalist-equal nil '(a . b))))
 
 (ert-deftest nalist-equal-test/cons-cons-t ()
-  (should-assert-error (nalist-equal '(a . b) '(a . b))))
+  (should-assertion-error (nalist-equal '(a . b) '(a . b))))
 
 (ert-deftest nalist-equal-test/alist-alist-t ()
   (should (nalist-equal '((a . b) (c . d)) '((a . b) (c . d)))))
@@ -208,25 +208,25 @@
   (should (nalist-set-equal nil nil)))
 
 (ert-deftest nalist-set-equal-test/nil-atom ()
-  (should-assert-error (nalist-set-equal nil "foo")))
+  (should-assertion-error (nalist-set-equal nil "foo")))
 
 (ert-deftest nalist-set-equal-test/atom-nil ()
-  (should-assert-error (nalist-set-equal "foo" nil)))
+  (should-assertion-error (nalist-set-equal "foo" nil)))
 
 (ert-deftest nalist-set-equal-test/nil-symbol ()
-  (should-assert-error (nalist-set-equal nil 'foo)))
+  (should-assertion-error (nalist-set-equal nil 'foo)))
 
 (ert-deftest nalist-set-equal-test/symbol-nil ()
-  (should-assert-error (nalist-set-equal 'foo nil)))
+  (should-assertion-error (nalist-set-equal 'foo nil)))
 
 (ert-deftest nalist-set-equal-test/cons-nil ()
-  (should-assert-error (nalist-set-equal '(a . b) nil)))
+  (should-assertion-error (nalist-set-equal '(a . b) nil)))
 
 (ert-deftest nalist-set-equal-test/nil-cons ()
-  (should-assert-error (nalist-set-equal nil '(a . b))))
+  (should-assertion-error (nalist-set-equal nil '(a . b))))
 
 (ert-deftest nalist-set-equal-test/cons-cons ()
-  (should-assert-error (nalist-set-equal '(a . b) '(a . b))))
+  (should-assertion-error (nalist-set-equal '(a . b) '(a . b))))
 
 (ert-deftest nalist-set-equal-test/alist-alist-nil ()
   (should-not (nalist-set-equal '((a . b) (c . d)) '((a . b) (c . x)))))
@@ -237,6 +237,12 @@
 (ert-deftest nalist-set-equal-test/alist-alist-nil ()
   (should (nalist-set-equal '((a . b) (c . d)) '((c . d) (a . b)))))
 
+(ert-deftest nalist-map-test/not-a-nalist ()
+  (with-unbound-symbols (na)
+    (setq na (make-hash-table)))
+  (let ((res nil))
+    (should-assertion-error (nalist-map #'(lambda (k v) (push k res)) na))))
+
 (ert-deftest nalist-map-test/nil ()
   (with-unbound-symbols (na)
     (setq na nil)
@@ -244,29 +250,34 @@
       (nalist-map #'(lambda (k v) (push k res)) na)
       (should (eq res nil)))))
 
-(ert-deftest nalist-map-test/not-a-nalist ()
+(ert-deftest nalist-map-test/nalist-one ()
   (with-unbound-symbols (na)
-    (setq na (make-hash-table)))
-  (let ((res nil))
-    (should-assert-error (nalist-map #'(lambda (k v) (push k res)) na))))
-
-(ert-deftest nalist-map-test/nalist ()
-  (with-unbound-symbols (na)
-    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h))))
+    (setq na (copy-alist '((a . b))))
     (let ((res nil))
       (nalist-map #'(lambda (k v) (push k res)) na)
-      (should (seq-set-equal-p res '(a c e g))))))
+      (should (seq-set-equal-p res '(a))))))
+
+(ert-deftest nalist-map-test/nalist-two ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (let ((res nil))
+      (nalist-map #'(lambda (k v) (push k res)) na)
+      (should (seq-set-equal-p res '(a c))))))
+
+(ert-deftest nalist-map-test/nalist-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (let ((res nil))
+      (nalist-map #'(lambda (k v) (push k res)) na)
+      (should (seq-set-equal-p res '(a c e g j l n p r t v x z 1 3 5))))))
 
 (ert-deftest nalist-pop-test/nil ()
   (with-unbound-symbols (na)
     (setq na nil)
     (should (eq (nalist-pop 'k na) nil))))
-
-(ert-deftest nalist-pop-test/existent-key ()
-  (with-unbound-symbols (na)
-    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h))))
-    (should (eq (nalist-pop 'e na) 'f))
-    (should (seq-set-equal-p na '((a . b) (c . d) (g . h))))))
 
 (ert-deftest nalist-pop-test/non-existent-key ()
   (with-unbound-symbols (na)
@@ -274,10 +285,75 @@
     (should (eq (nalist-pop 'k na) nil))
     (should (seq-set-equal-p na '((a . b) (c . d) (e . f) (g . h))))))
 
-(ert-deftest nalist-poppair-test ()
-  (with-nalist-fixture
-   (should (equal (nalist-poppair nal-4) '(a . b)))
-   (should (nalist-set-equal nal-4 '((c . d) (e . f) (g . h))))))
+(ert-deftest nalist-pop-test/existent-key-one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (should (eq (nalist-pop 'a na) 'b))
+    (should (eq na nil))))
+
+(ert-deftest nalist-pop-test/existent-key-two ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d))))
+    (should (eq (nalist-pop 'a na) 'b))
+    (should (seq-set-equal-p na '((c . d))))))
+
+(ert-deftest nalist-pop-test/existent-key-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (should (eq (nalist-pop 'e na) 'f))
+    (should (seq-set-equal-p na '((a . b) (c . d)         (g . h)
+                                  (j . k) (l . m) (n . o) (p . q)
+                                  (r . s) (t . u) (v . w) (x . y)
+                                  (z . 0) (1 . 2) (3 . 4) (5 . 6))))))
+
+(ert-deftest nalist-poppair-test/nil ()
+  (with-unbound-symbols (na)
+    (setq na nil)
+    (should (eq (nalist-poppair na) nil))))
+
+(ert-deftest nalist-poppair-test-one ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b))))
+    (should (equal (nalist-poppair na) '(a . b)))
+    (should (eq na nil))))
+
+(ert-deftest nalist-poppair-test-many ()
+  (with-unbound-symbols (na)
+    (setq na (copy-alist '((a . b) (c . d) (e . f) (g . h)
+                           (j . k) (l . m) (n . o) (p . q)
+                           (r . s) (t . u) (v . w) (x . y)
+                           (z . 0) (1 . 2) (3 . 4) (5 . 6))))
+    (should (equal (nalist-poppair na) '(a . b)))
+    (should (seq-set-equal-p na '((c . d) (e . f) (g . h)
+                                  (j . k) (l . m) (n . o) (p . q)
+                                  (r . s) (t . u) (v . w) (x . y)
+                                  (z . 0) (1 . 2) (3 . 4) (5 . 6))))))
+
+(ert-deftest nalist-copy-test/deep-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na nil)
+    (nalist-copy na nb)
+    (should (eq nb nil))))
+
+(ert-deftest nalist-copy-test/shallow-nil ()
+  (with-unbound-symbols (na nb)
+    (setq na nil)
+    (nalist-copy na nb :shallow t)
+    (should (eq nb nil))))
+
+(ert-deftest nalist-copy-test/deep-one ()
+  (with-unbound-symbols (na nb)
+    (setq na nil)
+    (nalist-copy na nb)
+    (should (eq nb nil))))
+
+(ert-deftest nalist-copy-test/not-a-nalsit ()
+  (with-unbound-symbols (na nb)
+    (setq na '(a b c))
+    (should-assertion-error (nalist-copy na nb))))
 
 (ert-deftest nalist-copy-test ()
   (with-nalist-fixture
@@ -287,7 +363,7 @@
    (should-not (eq nal nal-deep))
    (should (equal nal nal-deep))
    (setq not-nalist 'a)
-   (should-error (nalist-copy not-nalist nal-new))))
+   (should-assertion-error (nalist-copy not-nalist nal-new))))
 
 (ert-deftest nalist-values-test ()
   (with-nalist-fixture

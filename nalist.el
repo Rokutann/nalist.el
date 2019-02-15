@@ -179,8 +179,7 @@ with KEY and VALUE."
 This macro uses shallow-copy if SHALLOW is non-nil, otherwise
 uses deep-copy."
   `(progn
-     (unless (nalist-nalist-p ,nalist-old)
-       (error "Invalid initial value: `%s'" ,nalist-old))
+     (cl-assert (nalist-nalist-p ,nalist-old) t)
      (if ,shallow
          (setq ,nalist-new ,nalist-old)
        (setq ,nalist-new (copy-alist ,nalist-old)))
