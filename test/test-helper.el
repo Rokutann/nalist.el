@@ -26,10 +26,16 @@
 
 ;;; Code:
 
+(defmacro should-assert-error (&rest body)
+  "Make `cl-assert' raise an error while executing BODY."
+  `(let ((debug-on-error nil))
+     (should-error
+      ,@body)))
+
 (defun nalist-helper-compose-unbound-forms (sym-list)
   "Compose forms from SYM-LIST for `with-unbound-symbols'."
   (mapcar #'(lambda (sym)
-              `(makunbound ,sym))
+              `(makunbound ',sym))
           sym-list))
 
 (defmacro with-unbound-symbols (sym-list &rest body)

@@ -87,7 +87,7 @@
 (ert-deftest nalist-helper-with-unbound-vars ()
   (setq var-1 1)
   (setq var-2 2)
-  (with-unbound-symbols ('var-1 'var-2)
+  (with-unbound-symbols (var-1 var-2)
     (should-not (boundp 'var-1))
     (should-not (boundp 'var-2)))
   )

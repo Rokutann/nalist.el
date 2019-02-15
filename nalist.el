@@ -192,17 +192,20 @@ uses deep-copy."
         (after (gensym))
         (pair (gensym))
         (pair-found (gensym)))
-    `(cl-do* ((,before nil)
-              (,after ,nalist (cdr ,after))
-              (,pair (car ,after) (car ,after))
-              (,pair-found nil)
-              )
-         ((null ,after)
-          (setq ,nalist ,before)
-          (cdr ,pair-found))
-       (if (eq (car ,pair) ,key)
-           (setq ,pair-found ,pair)
-         (push ,pair ,before)))))
+    `(progn
+       (cl-assert (nalist-nalist-p ,nalist) t)
+       (if (null ,nalist) nil
+         (cl-do* ((,before nil)
+                  (,after ,nalist (cdr ,after))
+                  (,pair (car ,after) (car ,after))
+                  (,pair-found nil)
+                  )
+             ((null ,after)
+              (setq ,nalist ,before)
+              (cdr ,pair-found))
+           (if (eq (car ,pair) ,key)
+               (setq ,pair-found ,pair)
+             (push ,pair ,before)))))))
 
 (defmacro nalist-poppair (nalist)
   "Return a pair in NALIST, and remove it from NALIST."
@@ -215,6 +218,7 @@ uses deep-copy."
 
 FUNCTION is called with two arguments, KEY and VALUE.
 ‘nalist-map’ always returns nil."
+  (cl-assert (nalist-nalist-p nalist) t)
   (let ((remaining nalist))
     (while remaining
       (let ((pair (car remaining)))
@@ -233,12 +237,16 @@ FUNCTION is called with two arguments, KEY and VALUE.
 
 (defun nalist-equal (nalist-a nalist-b)
   "Return t if NALIST-A nad NALIST-B are identical `equal'-wise, otherwise nil."
+  (cl-assert (nalist-nalist-p nalist-a) t)
+  (cl-assert (nalist-nalist-p nalist-b) t)
   (equal nalist-a nalist-b))
 
 (defun nalist-set-equal (nalist-a nalist-b &optional testfn)
   "Test with TESTFN if NALIST-A and NALIST-B have the same set of pairs.
 
 Return t if so, otherwise nil.  The default TESTFN is `equal'."
+  (cl-assert (nalist-nalist-p nalist-a) t)
+  (cl-assert (nalist-nalist-p nalist-b) t)
   (seq-set-equal-p nalist-a nalist-b testfn))
 
 
