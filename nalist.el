@@ -6,7 +6,7 @@
 ;; Keywords: Lisp, tools
 ;; URL: https://github.com/mukuge/nalist.el
 ;; Package-Version: 0.1.0
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -146,23 +146,29 @@ through it."
   "Set NALIST nil."
   `(setq ,nalist nil))
 
+(defmacro nalist--compat-alist-get (key alist &optional default remove testfn)
+  "For compatibility with Emacs 25."
+  (if (>= emacs-major-version 26)
+      `(alist-get ,key ,alist ,default ,remove ,testfn)
+    `(alist-get ,key ,alist ,default ,remove)))
+
 (cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
   "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
 It destructively changes the value of the pair with KEY into
 VALUE if the pair with KEY already exists, otherwise add a
 new pair with KEY and VALUE to NALIST."
-  `(setf (alist-get ,key ,nalist nil nil ,testfn) ,value))
+  `(setf (nalist--compat-alist-get ,key ,nalist nil nil ,testfn) ,value))
 
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
   "Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
 
 The default value of TESTFN is 'eq."
-  (alist-get key nalist default nil testfn))
+  (nalist--compat-alist-get key nalist default nil testfn))
 
 (cl-defmacro nalist-remove (key nalist &key (testfn ''eq))
   "Remove the pair with KEY from NALIST if found with TESTFN."
-  `(setf (alist-get ,key ,nalist nil t ,testfn) nil))
+  `(setf (nalist--compat-alist-get ,key ,nalist nil t ,testfn) nil))
 
 (defun nalist-pairs (nalist)
   "Return a list consisting all the pairs in NALIST."
@@ -254,13 +260,21 @@ FUNCTION is called with two arguments, KEY and VALUE.
   (cl-assert (nalist-nalist-p nalist-b) t)
   (equal nalist-a nalist-b))
 
+(defmacro nalist--compat-seq-set-equal-p (sequence1 sequence2 &optional testfn)
+  "For compatibility with Emacs 25."
+  (if (>= emacs-major-version 26)
+      `(seq-set-equal-p ,sequence1 ,sequence2 ,testfn)
+    `(and (nalist-subset-p ,sequence1 ,sequence2)
+          (nalist-subset-p ,sequence2 ,sequence1))))
+
 (defun nalist-set-equal-p (nalist-a nalist-b)
   "Test with `equal' if NALIST-A and NALIST-B have the same set of pairs.
 
 Return t if so, otherwise nil."
   (cl-assert (nalist-nalist-p nalist-a) t)
   (cl-assert (nalist-nalist-p nalist-b) t)
-  (seq-set-equal-p nalist-a nalist-b))
+  (nalist--compat-seq-set-equal-p nalist-a nalist-b))
+
 
 
 (provide 'nalist)

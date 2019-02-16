@@ -26,6 +26,22 @@
 
 ;;; Code:
 
+(defun nalist-helper-subset-p (nalist-a nalist-b)
+  "Return t if NALIST-A is a subset of NALIST-B with `equal', otherwise nil."
+  (let ((res t))
+    (mapc #'(lambda (pair)
+              (unless (member pair nalist-b)
+                (setq res nil)))
+          nalist-a)
+    res))
+
+(defmacro nalist-helper-seq-set-equal-p (sequence1 sequence2 &optional testfn)
+  "For compatibility with Emacs 25."
+  (if (>= emacs-major-version 26)
+      `(seq-set-equal-p ,sequence1 ,sequence2 ,testfn)
+    `(and (nalist-helper-subset-p ,sequence1 ,sequence2)
+          (nalist-helper-subset-p ,sequence2 ,sequence1))))
+
 (defun nalist-helper-compose-generate-buffer-forms (sym-list)
   "Compose forms from SYM-LIST for `with-temp-buffers'."
   (mapcar #'(lambda (sym)
