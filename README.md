@@ -30,7 +30,9 @@ Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
 Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
 
-The default value of TESTFN is ’eq.
+On Emacs 25, the value of TESTFN is fiexed to ‘eq’. On Emacs 26,
+the key lookup is done with TESTFN if non-nil, otherwiser with
+‘eq’.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
 
@@ -211,7 +213,7 @@ Return t if NALIST-A nad NALIST-B are identical with ‘equal’, otherwise nil.
 
 ### nalist-set-equal-p `(nalist-a nalist-b)`
 
-Test with ‘equal’ if NALIST-A and NALIST-B have the same set of pairs.
+Test with ‘equal’ if NALIST-A and NALIST-B contain the same set of pairs.
 
 Return t if so, otherwise nil.
 

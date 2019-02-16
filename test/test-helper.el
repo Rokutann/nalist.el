@@ -27,7 +27,9 @@
 ;;; Code:
 
 (defun nalist-helper-subset-p (nalist-a nalist-b)
-  "Return t if NALIST-A is a subset of NALIST-B with `equal', otherwise nil."
+  "Return t if NALIST-A is a subset of NALIST-B, otherwise nil.
+
+Equality is defined by `equal'."
   (let ((res t))
     (mapc #'(lambda (pair)
               (unless (member pair nalist-b)
@@ -36,7 +38,11 @@
     res))
 
 (defmacro nalist-helper-seq-set-equal-p (sequence1 sequence2 &optional testfn)
-  "For compatibility with Emacs 25."
+  "Return non-nil if SEQUENCE1 and SEQUENCE2 contain the same elements.
+
+Equality is defined by `equal' in Emacs 25. In Emacs newer than
+version 26, it is defined by TESTFN if non-nil or by `equal’ if
+nil."
   (if (>= emacs-major-version 26)
       `(seq-set-equal-p ,sequence1 ,sequence2 ,testfn)
     `(and (nalist-helper-subset-p ,sequence1 ,sequence2)
