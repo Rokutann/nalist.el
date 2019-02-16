@@ -146,20 +146,48 @@ through it."
   "Set NALIST nil."
   `(setq ,nalist nil))
 
-(defmacro nalist--compat-alist-get (key alist &optional default remove testfn)
-  "Return the value associated with KEY in ALIST.
+(cl-defmacro nalist--alist-set (key value nalist &key (testfn ''eq))
+  "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-If KEY is not found in ALIST, return DEFAULT.  On Emacs 25, the
-key lookup is done with `eq'.  On Emacs 26, it's done with TESTFN
-if non-nil, otherwise with `eq'.
+This is a compatibility macro for Emacs 25."
+  (let ((before (cl-gensym))
+        (after (cl-gensym))
+        (pair (cl-gensym))
+        (pair-found (cl-gensym)))
+    `(progn
+       (cl-assert (nalist-nalist-p ,nalist) t)
+       (if (null ,nalist)
+           (progn
+             (setq ,nalist (list (cons ,key ,value)))
+             ,value)
+         (cl-do* ((,before nil)
+                  (,after ,nalist (cdr ,after))
+                  (,pair (car ,after) (car ,after))
+                  (,pair-found nil))
+             ((null ,after)
+              (unless ,pair-found
+                (push (cons ,key ,value) ,before))
+              (setq ,nalist ,before)
+              ,value)
+           (when (funcall ,testfn (car ,pair) ,key)
+             (setq ,pair-found t)
+             (setq ,pair (cons (car ,pair) ,value)))
+           (push ,pair ,before))))))
 
-REMOVE should be used when this function is called as a generalized variable."
+(cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
+  "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
+
+It destructively changes the value of the pair with KEY into
+VALUE if the pair with KEY already exists, otherwise add a
+new pair with KEY and VALUE to NALIST."
   (if (>= emacs-major-version 26)
-      `(alist-get ,key ,alist ,default ,remove ,testfn)
-    `(alist-get ,key ,alist ,default ,remove)))
+      `(setf (alist-get ,key ,nalist nil nil ,testfn) ,value)
+    `(nalist--alist-set ,key ,value ,nalist :testfn ,testfn)))
 
 (cl-defun nalist--alist-get (key nalist &key (default nil) (testfn 'eq))
-  "Return the value associated with KEY in ALIST with using TESTFN."
+  "Return the value associated with KEY in ALIST with using TESTFN.
+
+This is a compatibility function for Emacs 25."
   (let ((list nalist)
         (res default))
     (while list
@@ -169,27 +197,50 @@ REMOVE should be used when this function is called as a generalized variable."
       (setq list (cdr list)))
     res))
 
-(cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
-  "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
-
-It destructively changes the value of the pair with KEY into
-VALUE if the pair with KEY already exists, otherwise add a
-new pair with KEY and VALUE to NALIST."
-  `(setf (nalist--compat-alist-get ,key ,nalist nil nil ,testfn) ,value))
-
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
   "Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
 
-On Emacs 25, the value of TESTFN is fiexed to `eq'. On Emacs 26,
-the key lookup is done with TESTFN if non-nil, otherwiser with
+The key lookup is done with TESTFN if non-nil, otherwiser with
 `eq'."
   (if (>= emacs-major-version 26)
       (alist-get key nalist default nil testfn)
     (nalist--alist-get key nalist :default default :testfn testfn)))
 
+(cl-defmacro nalist--remove (key nalist &key (default nil) (testfn ''eq))
+  "Remove the pair with KEY from NALIST, and return the value of the pair.
+
+This macro uses TESTFN to find the pair with the KEY. The default
+value of TESTFN is `eq'.
+
+This is a compatibility function for Emacs 25."
+  (let ((before (cl-gensym))
+        (after (cl-gensym))
+        (pair (cl-gensym))
+        (pair-found (cl-gensym)))
+    `(progn
+       (cl-assert (nalist-nalist-p ,nalist) t)
+       (if (null ,nalist) nil
+         (cl-do* ((,before nil)
+                  (,after ,nalist (cdr ,after))
+                  (,pair (car ,after) (car ,after))
+                  (,pair-found nil))
+             ((null ,after)
+              (setq ,nalist ,before)
+              (if ,pair-found
+                  (cdr ,pair-found)
+                ,default))
+           (if (funcall ,testfn (car ,pair) ,key)
+               (setq ,pair-found ,pair)
+             (push ,pair ,before)))))))
+
 (cl-defmacro nalist-remove (key nalist &key (testfn ''eq))
   "Remove the pair with KEY from NALIST if found with TESTFN."
-  `(setf (nalist--compat-alist-get ,key ,nalist nil t ,testfn) nil))
+  (if (>= emacs-major-version 26)
+      (let ((value (cl-gensym)))
+        `(let ((,value (alist-get ,key ,nalist nil t ,testfn)))
+           (setf (alist-get ,key ,nalist nil t ,testfn) nil)
+           ,value))
+    `(nalist--remove ,key ,nalist :default nil :testfn ,testfn)))
 
 (defun nalist-pairs (nalist)
   "Return a list consisting all the pairs in NALIST."
@@ -218,29 +269,11 @@ uses deep-copy."
        (setq ,nalist-new (copy-alist ,nalist-old)))
      ',nalist-new))
 
-(cl-defmacro nalist-pop (key nalist &key (testfn ''eq))
+(defalias 'nalist-pop 'nalist-remove
   "Remove the pair with KEY from NALIST, and return the value of the pair.
 
 This macro uses TESTFN to find the pair with the KEY. The default
-value of TESTFN is `eq'."
-  (let ((before (cl-gensym))
-        (after (cl-gensym))
-        (pair (cl-gensym))
-        (pair-found (cl-gensym)))
-    `(progn
-       (cl-assert (nalist-nalist-p ,nalist) t)
-       (if (null ,nalist) nil
-         (cl-do* ((,before nil)
-                  (,after ,nalist (cdr ,after))
-                  (,pair (car ,after) (car ,after))
-                  (,pair-found nil)
-                  )
-             ((null ,after)
-              (setq ,nalist ,before)
-              (cdr ,pair-found))
-           (if (funcall ,testfn (car ,pair) ,key)
-               (setq ,pair-found ,pair)
-             (push ,pair ,before)))))))
+value of TESTFN is `eq'.")
 
 (defmacro nalist-poppair (nalist)
   "Return a pair in NALIST, and remove it from NALIST."

@@ -896,7 +896,6 @@
                                   (z . 0) (1 . 2) (3 . 100) (5 . 6))))))
 
 (ert-deftest nalist-set-test/testfn ()
-  (ert--skip-unless (>= emacs-major-version 26))
   (with-unbound-symbols (na)
     (setq na (copy-alist '(("a" . b) ("c" . d))))
     (nalist-set "a" 'c na :testfn 'equal)
@@ -975,7 +974,6 @@
                                   (z . 0) (1 . 2)         (5 . 6))))))
 
 (ert-deftest nalist-remove-test/testfn ()
-  (ert--skip-unless (>= emacs-major-version 26))
   (with-unbound-symbols (na)
     (setq na (copy-alist '(("a" . b) ("c" . d))))
     (nalist-remove "a" na :testfn 'equal)

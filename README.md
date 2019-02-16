@@ -30,8 +30,7 @@ Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
 Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
 
-On Emacs 25, the value of TESTFN is fiexed to ‘eq’. On Emacs 26,
-the key lookup is done with TESTFN if non-nil, otherwiser with
+The key lookup is done with TESTFN if non-nil, otherwiser with
 ‘eq’.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
@@ -75,8 +74,6 @@ Remove the pair with KEY from NALIST, and return the value of the pair.
 
 This macro uses TESTFN to find the pair with the KEY. The default
 value of TESTFN is ‘eq’.
-
-(fn KEY NALIST &key (TESTFN ''eq))
 
 ```lisp
 (nalist-pop 'c nal-1) ;; => 'd
