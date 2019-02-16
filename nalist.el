@@ -5,7 +5,7 @@
 ;; Author: Cyriakus "Mukuge" Hill <cyriakus.h@gmail.com>
 ;; Keywords: Lisp, tools
 ;; URL: https://github.com/mukuge/nalist.el
-;; Package-Version: 0.1.1
+;; Package-Version: 0.1.2
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -200,7 +200,7 @@ This is a compatibility function for Emacs 25."
 (cl-defun nalist-get (key nalist &key default (testfn 'eq))
   "Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
 
-The key lookup is done with TESTFN if non-nil, otherwiser with
+The key lookup is done with TESTFN if non-nil, otherwise with
 `eq'."
   (if (>= emacs-major-version 26)
       (alist-get key nalist default nil testfn)
@@ -273,7 +273,9 @@ uses deep-copy."
   "Remove the pair with KEY from NALIST, and return the value of the pair.
 
 This macro uses TESTFN to find the pair with the KEY. The default
-value of TESTFN is `eq'.")
+value of TESTFN is `eq'.
+
+This is an alias of `nalist-remove'.")
 
 (defmacro nalist-poppair (nalist)
   "Return a pair in NALIST, and remove it from NALIST."
