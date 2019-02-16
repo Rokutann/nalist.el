@@ -823,7 +823,6 @@
     (should (eq (nalist-get 'z na) 0))))
 
 (ert-deftest nalist-get-test/testfn ()
-  (ert--skip-unless (>= emacs-major-version 26))
   (with-unbound-symbols (na)
     (setq na (copy-alist '(("a" . b))))
     (should (eq (nalist-get "a" na :testfn 'equal) 'b))))

@@ -158,6 +158,17 @@ REMOVE should be used when this function is called as a generalized variable."
       `(alist-get ,key ,alist ,default ,remove ,testfn)
     `(alist-get ,key ,alist ,default ,remove)))
 
+(cl-defun nalist--alist-get (key nalist &key (default nil) (testfn 'eq))
+  "Return the value associated with KEY in ALIST with using TESTFN."
+  (let ((list nalist)
+        (res default))
+    (while list
+      (let ((pair (car list)))
+        (when (funcall testfn key (car pair))
+          (setq res (cdr pair))))
+      (setq list (cdr list)))
+    res))
+
 (cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
   "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
@@ -172,7 +183,9 @@ new pair with KEY and VALUE to NALIST."
 On Emacs 25, the value of TESTFN is fiexed to `eq'. On Emacs 26,
 the key lookup is done with TESTFN if non-nil, otherwiser with
 `eq'."
-  (nalist--compat-alist-get key nalist default nil testfn))
+  (if (>= emacs-major-version 26)
+      (alist-get key nalist default nil testfn)
+    (nalist--alist-get key nalist :default default :testfn testfn)))
 
 (cl-defmacro nalist-remove (key nalist &key (testfn ''eq))
   "Remove the pair with KEY from NALIST if found with TESTFN."
