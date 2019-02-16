@@ -119,7 +119,7 @@ and value respectively."
 This macro binds a deep-copy of the content of the original
 NALIST to the buffer-local NALIST to avoid their sharing cons
 cells."
-  (let ((copy (gensym)))
+  (let ((copy (cl-gensym)))
     `(let ((,copy (copy-alist ,nalist)))
        (make-local-variable ',nalist)
        (setq ,nalist ,copy)
@@ -135,7 +135,7 @@ cells.
 It also sets the default value of NALIST to nil to avoid the
 buffer-local variables in other buffers share the cons cells
 through it."
-  (let ((copy (gensym)))
+  (let ((copy (cl-gensym)))
     `(let ((,copy ,nalist))
        (setq ,nalist nil)
        (make-variable-buffer-local ',nalist)
@@ -196,10 +196,10 @@ uses deep-copy."
 
 This macro uses TESTFN to find the pair with the KEY. The default
 value of TESTFN is `eq'."
-  (let ((before (gensym))
-        (after (gensym))
-        (pair (gensym))
-        (pair-found (gensym)))
+  (let ((before (cl-gensym))
+        (after (cl-gensym))
+        (pair (cl-gensym))
+        (pair-found (cl-gensym)))
     `(progn
        (cl-assert (nalist-nalist-p ,nalist) t)
        (if (null ,nalist) nil
@@ -217,7 +217,7 @@ value of TESTFN is `eq'."
 
 (defmacro nalist-poppair (nalist)
   "Return a pair in NALIST, and remove it from NALIST."
-  (let ((pair (gensym)))
+  (let ((pair (cl-gensym)))
     `(progn
        (cl-assert (nalist-nalist-p ,nalist))
        (let ((,pair (car ,nalist)))
