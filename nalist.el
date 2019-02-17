@@ -179,10 +179,15 @@ This is a compatibility macro for Emacs 25."
 
 It destructively changes the value of the pair with KEY into
 VALUE if the pair with KEY already exists, otherwise add a
-new pair with KEY and VALUE to NALIST."
-  (if (>= emacs-major-version 26)
-      `(setf (alist-get ,key ,nalist nil nil ,testfn) ,value)
-    `(nalist--alist-set ,key ,value ,nalist :testfn ,testfn)))
+new pair with KEY and VALUE to NALIST.
+
+It returns VALUE."
+  (let ((evalue (cl-gensym)))
+    (if (>= emacs-major-version 26)
+        `(let ((,evalue ,value))
+           (setf (alist-get ,key ,nalist nil nil ,testfn) ,evalue)
+           ,evalue)
+      `(nalist--alist-set ,key ,value ,nalist :testfn ,testfn))))
 
 (cl-defun nalist--alist-get (key nalist &key (default nil) (testfn 'eq))
   "Return the value associated with KEY in ALIST with using TESTFN.
