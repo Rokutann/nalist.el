@@ -1,11 +1,18 @@
 # Changelog
 
-## 0.1.3 (wip)
+## 0.1.3 (2019-02-18)
 
 ### Changes
 
+* Added a keyword argmunet ALIST-EVAL-ONCE to `nalist-init`.
+
 * On Emacs 26, the return value of `nalist-set` was changed from the
   whole alist to the value it just associated with the key.
+
+### Bug fixes
+
+* Fixed leaky macros: `nalist-set` and `nalist-remove`.
+
 
 ## 0.1.2 (2019-02-16)
 

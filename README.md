@@ -13,11 +13,15 @@ your Emacs config:
 
 ## Documentation and Examples
 
-### nalist-init `(symbol alist &key shallow)`
+### nalist-init `(symbol alist &key alist-eval-once shallow)`
 
-Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
+Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
-(fn SYMBOL ALIST &key SHALLOW)
+When ALIST is an expression generating different alists each time
+it’s called, setting the value of ALIST-EVAL-ONCE non-nil will
+ensure that it’s evaled just onece in this macro..
+
+(fn NAME ALIST &key ALIST-EVAL-ONCE SHALLOW)
 
 ```lisp
 (nalist-init nal-1 '((a . b) (c . d))) ;; => nal-1
@@ -46,9 +50,12 @@ The key lookup is done with TESTFN if non-nil, otherwise with
 
 Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-It destructively changes the value of the pair with KEY into
-VALUE if the pair with KEY already exists, otherwise add a
+This macro destructively changes the value of the pair with KEY
+into VALUE if the pair with KEY already exists, otherwise add a
 new pair with KEY and VALUE to NALIST.
+
+NALIST needs to be a symbol without a quote to access the correct
+binding in its context.
 
 It returns VALUE.
 

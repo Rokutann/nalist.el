@@ -103,15 +103,28 @@ and value respectively."
                obj)
          res)))
 
-(cl-defmacro nalist-init (symbol alist &key shallow)
-  "Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST."
-  `(progn
-     (unless (nalist-nalist-p ,alist)
-       (error "Invalid initial value `%s'" ,alist))
-     (if ,shallow
-         (setq ,symbol ,alist)
-       (setq ,symbol (copy-alist ,alist)))
-     ',symbol))
+(cl-defmacro nalist-init (name alist &key alist-eval-once shallow)
+  "Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
+
+When ALIST is an expression generating different alists each time
+it's called, setting the value of ALIST-EVAL-ONCE non-nil will
+ensure that it's evaled just onece in this macro.."
+  (if alist-eval-once
+      (let ((ealist (cl-gensym)))
+        `(let ((,ealist ,alist))
+           (unless (nalist-nalist-p ,ealist)
+             (error "Invalid initial value `%s'" ,ealist))
+           (if ,shallow
+               (setq ,name ,ealist)
+             (setq ,name (copy-alist ,ealist)))
+           ',name))
+    `(progn
+       (unless (nalist-nalist-p ,alist)
+         (error "Invalid initial value `%s'" ,alist))
+       (if ,shallow
+           (setq ,name ,alist)
+         (setq ,name (copy-alist ,alist)))
+       ',name)))
 
 (defmacro nalist-make-local-variable (nalist)
   "Create a buffer-local binding in the current buffer for NALIST.
@@ -153,33 +166,40 @@ This is a compatibility macro for Emacs 25."
   (let ((before (cl-gensym))
         (after (cl-gensym))
         (pair (cl-gensym))
-        (pair-found (cl-gensym)))
+        (pair-found (cl-gensym))
+        (ekey (cl-gensym))
+        (evalue (cl-gensym)))
     `(progn
        (cl-assert (nalist-nalist-p ,nalist) t)
-       (if (null ,nalist)
-           (progn
-             (setq ,nalist (list (cons ,key ,value)))
-             ,value)
-         (cl-do* ((,before nil)
-                  (,after ,nalist (cdr ,after))
-                  (,pair (car ,after) (car ,after))
-                  (,pair-found nil))
-             ((null ,after)
-              (unless ,pair-found
-                (push (cons ,key ,value) ,before))
-              (setq ,nalist ,before)
-              ,value)
-           (when (funcall ,testfn (car ,pair) ,key)
-             (setq ,pair-found t)
-             (setq ,pair (cons (car ,pair) ,value)))
-           (push ,pair ,before))))))
+       (let ((,ekey ,key)
+             (,evalue ,value))
+         (if (null ,nalist)
+             (progn
+               (setq ,nalist (list (cons ,ekey ,evalue)))
+               ,value)
+           (cl-do* ((,before nil)
+                    (,after ,nalist (cdr ,after))
+                    (,pair (car ,after) (car ,after))
+                    (,pair-found nil))
+               ((null ,after)
+                (unless ,pair-found
+                  (push (cons ,ekey ,evalue) ,before))
+                (setq ,nalist ,before)
+                ,evalue)
+             (when (funcall ,testfn (car ,pair) ,ekey)
+               (setq ,pair-found t)
+               (setq ,pair (cons (car ,pair) ,evalue)))
+             (push ,pair ,before)))))))
 
 (cl-defmacro nalist-set (key value nalist &key (testfn ''eq))
   "Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 
-It destructively changes the value of the pair with KEY into
-VALUE if the pair with KEY already exists, otherwise add a
+This macro destructively changes the value of the pair with KEY
+into VALUE if the pair with KEY already exists, otherwise add a
 new pair with KEY and VALUE to NALIST.
+
+NALIST needs to be a symbol without a quote to access the correct
+binding in its context.
 
 It returns VALUE."
   (let ((evalue (cl-gensym)))
@@ -187,7 +207,8 @@ It returns VALUE."
         `(let ((,evalue ,value))
            (setf (alist-get ,key ,nalist nil nil ,testfn) ,evalue)
            ,evalue)
-      `(nalist--alist-set ,key ,value ,nalist :testfn ,testfn))))
+      `(let ((,evalue ,value))
+         (nalist--alist-set ,key ,evalue ,nalist :testfn ,testfn)))))
 
 (cl-defun nalist--alist-get (key nalist &key (default nil) (testfn 'eq))
   "Return the value associated with KEY in ALIST with using TESTFN.
@@ -241,10 +262,14 @@ This is a compatibility function for Emacs 25."
 (cl-defmacro nalist-remove (key nalist &key (testfn ''eq))
   "Remove the pair with KEY from NALIST if found with TESTFN."
   (if (>= emacs-major-version 26)
-      (let ((value (cl-gensym)))
-        `(let ((,value (alist-get ,key ,nalist nil t ,testfn)))
-           (setf (alist-get ,key ,nalist nil t ,testfn) nil)
-           ,value))
+      (let ((ekey (cl-gensym))
+            (etestfn (cl-gensym))
+            (value (cl-gensym)))
+        `(let ((,ekey ,key)
+               (,etestfn ,testfn))
+           (let ((,value (alist-get ,ekey ,nalist nil t ,etestfn)))
+             (setf (alist-get ,ekey ,nalist nil t ,etestfn) nil)
+             ,value)))
     `(nalist--remove ,key ,nalist :default nil :testfn ,testfn)))
 
 (defun nalist-pairs (nalist)

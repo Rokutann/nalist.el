@@ -173,6 +173,17 @@
   (with-unbound-symbols (na)
     (should-error (nalist-init na 'a))))
 
+(ert-deftest nalist-init-test/alist-eval-once-t ()
+  (with-unbound-symbols (na alist-generator)
+    (let ((store '(((a . b)) ((c . d)) ((e . f)))))
+      (setq alist-generator #'(lambda ()
+                                (prog1
+                                    (car store)
+                                  (setq store (cdr store))))))
+    (nalist-init na (funcall alist-generator) :alist-eval-once t)
+    (should (equal na '((a . b))))
+    ))
+
 (ert-deftest nalist-init-test/let-scope-hygienic ()
   (with-unbound-symbols (alist blist na)
     (setq alist (copy-alist '((a . b) (c . d))))
