@@ -30,7 +30,7 @@ Bind SYMBOL to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
 Return the value of KEY in NALIST if found with TESTFN, otherwise DEFAULT.
 
-The key lookup is done with TESTFN if non-nil, otherwiser with
+The key lookup is done with TESTFN if non-nil, otherwise with
 ‘eq’.
 
 (fn KEY NALIST &key DEFAULT (TESTFN 'eq))
@@ -49,6 +49,8 @@ Find the pair with KEY in NALIST with TESTFN, and set its value to VALUE.
 It destructively changes the value of the pair with KEY into
 VALUE if the pair with KEY already exists, otherwise add a
 new pair with KEY and VALUE to NALIST.
+
+It returns VALUE.
 
 (fn KEY VALUE NALIST &key (TESTFN ''eq))
 
@@ -74,6 +76,8 @@ Remove the pair with KEY from NALIST, and return the value of the pair.
 
 This macro uses TESTFN to find the pair with the KEY. The default
 value of TESTFN is ‘eq’.
+
+This is an alias of ‘nalist-remove’.
 
 ```lisp
 (nalist-pop 'c nal-1) ;; => 'd

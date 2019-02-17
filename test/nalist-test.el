@@ -852,10 +852,15 @@
 
 ;;; nalist-set
 
+(ert-deftest nalist-set-test/return-value ()
+  (with-unbound-symbols (na)
+    (setq na nil)
+    (should (eq (nalist-set 'a 'b na) 'b))))
+
 (ert-deftest nalist-set-test/nil ()
   (with-unbound-symbols (na)
     (setq na nil)
-    (nalist-set 'a 'b na)
+    (should (eq (nalist-set 'a 'b na) 'b))
     (should (nalist-helper-seq-set-equal-p na '((a . b))))))
 
 (ert-deftest nalist-set-test/non-existent-key-one ()

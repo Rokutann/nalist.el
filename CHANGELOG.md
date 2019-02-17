@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 (wip)
+
+### Changes
+
+* On Emacs 26, the return value of `nalist-set` was changed from the
+  whole alist to the value it just associated with the key.
+
 ## 0.1.2 (2019-02-16)
 
 ### New features
