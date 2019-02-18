@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 (wip)
+
+### Changes
+
+* Added prefixes to all `cl-gensym` calls for slightly easier macro debugging.
+
 ## 0.1.3 (2019-02-18)
 
 ### Changes
