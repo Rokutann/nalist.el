@@ -1,4 +1,4 @@
-(source gnu)
+;;(source gnu)
 (source melpa)
 
 (package-file "nalist.el")
