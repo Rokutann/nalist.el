@@ -17,9 +17,9 @@ your Emacs config:
 
 Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
-When ALIST is an expression generating different alists each time
-it’s called, setting the value of ALIST-EVAL-ONCE non-nil will
-ensure that it’s evaled just onece in this macro..
+Setting the value of ALIST-EVAL-ONCE non-nil ensures that ALIST is evaled just once
+in this macro. This is for usage cases such as when ALIST is an expression
+generating a different alist each time it’s called.
 
 (fn NAME ALIST &key ALIST-EVAL-ONCE SHALLOW)
 
