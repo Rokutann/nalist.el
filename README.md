@@ -13,7 +13,7 @@ your Emacs config:
 
 ## Documentation and Examples
 
-### nalist-init `(symbol alist &key alist-eval-once shallow)`
+### nalist-init `(name alist &key alist-eval-once shallow)`
 
 Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
