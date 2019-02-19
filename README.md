@@ -16,7 +16,7 @@ your Emacs config:
 * [nalist-init](#nalist-init-name-alist-key-shallow) `(name alist &key shallow)`
 * [nalist-get](#nalist-get-key-nalist-key-default-testfn-eq) `(key nalist &key default (testfn 'eq))`
 * [nalist-set](#nalist-set-key-value-nalist-key-testfn-eq) `(key value nalist &key (testfn 'eq))`
-* [nalist-remove](nalist-remove-key-nalist-key-testfn-eq) `(key nalist &key (testfn 'eq))`
+* [nalist-remove](#nalist-remove-key-nalist-key-testfn-eq) `(key nalist &key (testfn 'eq))`
 * [nalist-pop](#nalist-pop-key-nalist-key-testfn-eq) `(key nalist &key (testfn 'eq)`
 * [nalist-poppair](#nalist-pop-key-nalist-key-testfn-eq) `(nalist)`
 * [nalist-pairs](#nalist-pop-key-nalist-key-testfn-eq) `(nalist)`
@@ -32,7 +32,7 @@ your Emacs config:
 * [nalist-equal](#nalist-equal-nalist-a-nalist-b) `(nalist-a nalist-b)`
 * [nalist-set-equal-p](#nalist-set-equal-p-nalist-a-nalist-b) `(nalist-a nalist-b)`
 * [nalist-make-local-variable](#nalist-make-local-variable-nalist) `(nalist)`
-* [nalist-make-variable-buffer-local](nalist-make-variable-buffer-local-nalist) `(nalist)`
+* [nalist-make-variable-buffer-local](#nalist-make-variable-buffer-local-nalist) `(nalist)`
 
 ## Documentation and Examples
 
