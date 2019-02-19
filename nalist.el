@@ -103,28 +103,15 @@ and value respectively."
                obj)
          res)))
 
-(cl-defmacro nalist-init (name alist &key alist-eval-once shallow)
-  "Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
-
-Setting the value of ALIST-EVAL-ONCE non-nil ensures that ALIST
-is evaled just once in this macro. This is for usage cases such
-as when ALIST is an expression generating a different alist each
-time it’s called."
-  (if alist-eval-once
-      (let ((ealist (cl-gensym "alist-")))
-        `(let ((,ealist ,alist))
-           (unless (nalist-nalist-p ,ealist)
-             (error "Invalid initial value `%s'" ,ealist))
-           (if ,shallow
-               (setq ,name ,ealist)
-             (setq ,name (copy-alist ,ealist)))
-           ',name))
-    `(progn
-       (unless (nalist-nalist-p ,alist)
-         (error "Invalid initial value `%s'" ,alist))
+(cl-defmacro nalist-init (name alist &key shallow)
+  "Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST."
+  (let ((ealist (cl-gensym "alist-")))
+    `(let ((,ealist ,alist))
+       (unless (nalist-nalist-p ,ealist)
+         (error "Invalid initial value `%s'" ,ealist))
        (if ,shallow
-           (setq ,name ,alist)
-         (setq ,name (copy-alist ,alist)))
+           (setq ,name ,ealist)
+         (setq ,name (copy-alist ,ealist)))
        ',name)))
 
 (defmacro nalist-make-local-variable (nalist)

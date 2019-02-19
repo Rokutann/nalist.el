@@ -13,7 +13,7 @@ your Emacs config:
 
 ## Documentation and Examples
 
-### nalist-init `(name alist &key alist-eval-once shallow)`
+### nalist-init `(name alist &key shallow)`
 
 {{nalist-init}}
 

@@ -13,16 +13,11 @@ your Emacs config:
 
 ## Documentation and Examples
 
-### nalist-init `(name alist &key alist-eval-once shallow)`
+### nalist-init `(name alist &key shallow)`
 
 Bind NAME to ALIST if SHALLOW is non-nil, otherwise to a deep-copy of ALIST.
 
-Setting the value of ALIST-EVAL-ONCE non-nil ensures that ALIST
-is evaled just once in this macro. This is for usage cases such
-as when ALIST is an expression generating a different alist each
-time it’s called.
-
-(fn NAME ALIST &key ALIST-EVAL-ONCE SHALLOW)
+(fn NAME ALIST &key SHALLOW)
 
 ```lisp
 (nalist-init nal-1 '((a . b) (c . d))) ;; => nal-1

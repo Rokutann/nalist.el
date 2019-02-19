@@ -5,6 +5,8 @@
 ### Changes
 
 * Added prefixes to all `cl-gensym` calls for slightly easier macro debugging.
+* Dropped ALIST-EVAL-ONCE from `nalist-init` and make the feature default.
+
 
 ## 0.1.3 (2019-02-18)
 
@@ -13,7 +15,7 @@
 * Added a keyword argmunet ALIST-EVAL-ONCE to `nalist-init`.
 
 * On Emacs 26, the return value of `nalist-set` was changed from the
-  whole alist to the value it just associated with the key.
+  whole alist to the value just associated with the key.
 
 ### Bug fixes
 
@@ -37,4 +39,4 @@
 
 * Deployed Travis CI.
 * Added support for Emacs 25.1, 25.2, and 25.3.
-* On Emacs 25, testfn of `nalist-get' is ignored and always 'eq.
+* On Emacs 25, testfn of `nalist-get` is ignored and always 'eq.
