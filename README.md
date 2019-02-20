@@ -1,4 +1,4 @@
-# nalist.el
+# nalist.el [![Build Status](https://travis-ci.org/mukuge/nalist.el.svg?branch=dev)](https://travis-ci.org/mukuge/nalist.el)
 
 API to deal with association lists with names, or named alists. It's safe with lexical and buffer-local bindings.
 
