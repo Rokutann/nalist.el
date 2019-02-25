@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6.d (wip)
+
+Preparing to upload to MELPA.
+
 ## 0.1.5 (2019-02-25)
 
 ### Changes
@@ -39,6 +43,7 @@
 
 * Changed the return value of `nalist-remove` to be the same as `nalist-pop`.
 * Changed `nalist-pop` from a macro to an alias of `nalist-remove`.
+
 
 ## 0.1.1 (2019-02-16)
 
