@@ -1,4 +1,7 @@
-# nalist.el [![Build Status](https://travis-ci.org/mukuge/nalist.el.svg?branch=dev)](https://travis-ci.org/mukuge/nalist.el)
+[![Build Status](https://travis-ci.org/mukuge/nalist.el.svg?branch=master)](https://travis-ci.org/mukuge/nalist.el)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+# nalist.el
 
 API to deal with association lists with names, or named alists. It's safe with lexical and buffer-local bindings.
 
