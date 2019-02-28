@@ -74,27 +74,31 @@ A proper list is a non circular cons chain whose last `cdr' points nil."
          when (null 2nth-cdr) return t
          when (not (consp 2nth-cdr)) return nil
          ;; If 2nth cdr position is a terminus, it's a non circular
-         ;; list. If the terminous is nil, it's a proper list, and if
+         ;; list.  If the terminous is nil, it's a proper list, and if
          ;; the termious is not consp, i.e. an object which is neither
-         ;; a cons cell nor nil, it's not a proper list.
+         ;; nil nor a cons cell, it's not a proper list.
          ;;
          when (null (cdr 2nth-cdr)) return t
          when (not (consp (cdr 2nth-cdr))) return nil
          ;; If (2n+1)th cdr position is a terminus, it's a non
-         ;; circular list. If the terminous is nil, it's a proper
+         ;; circular list.  If the terminous is nil, it's a proper
          ;; list, and if the termious is not consp, i.e. an object
-         ;; which is neither a cons cell nor nil, it's not a proper
+         ;; which is neither nil nor a cons cell, it's not a proper
          ;; list.
          ;;
          when (null (cddr 2nth-cdr)) return t
          when (not (consp (cddr 2nth-cdr))) return nil)
         ;; If (2n+2)th, or the next 2nth, cdr position is a terminous,
-        ;; it's a non circular list.
+        ;; it's a non circular list.  If the terminous is nil, it's a
+        ;; proper list, and if the termious is not consp, i.e. an
+        ;; object which is neither nil nor a cons cell, it's not a
+        ;; proper list.
         ;;
         ;; Given none of the above three positions is a terminus,
         ;; iterate over to the next nth and 2nth, i.e. (n+1)th and
         ;; 2(n+1)th, positions, which is nicely expressed with the
-        ;; `cdr' for nth-cdr and `cddr' for 2nth-cdr.
+        ;; `cdr' for nth-cdr and `cddr' for 2nth-cdr in the variable
+        ;; definition part of this `cl-loop'.
         )))
 
 (defun nalist-nalist-p (obj)
