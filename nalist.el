@@ -54,7 +54,7 @@ A proper list is a non circular cons chain whose last `cdr' points nil."
          when (eq nth-cdr 2nth-cdr) return nil
          ;; A circular list consists of finite positions: When we move
          ;; a pointer along with its cons cell chain by using `cdr',
-         ;; it goes back to the same reference point in finite steps.
+         ;; it goes back to the start point in finite steps.
          ;; Moreover, it's periodic.  Let's assume its period is N
          ;; steps.  If we have two pointers so that one moves one step
          ;; at a time starting from the position 1, and the other
